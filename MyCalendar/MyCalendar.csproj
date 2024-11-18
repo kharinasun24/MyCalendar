@@ -8,4 +8,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Nager.Date" Version="2.7.1" />
+    <PackageReference Include="Nager.Holiday" Version="1.0.1" />
+  </ItemGroup>
+
 </Project>
