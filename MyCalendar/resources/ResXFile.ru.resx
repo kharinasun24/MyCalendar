@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="address (street)" xml:space="preserve">
+    <value>адрес (улица)</value>
+  </data>
+  <data name="address (town)" xml:space="preserve">
+    <value>адрес (город)</value>
+  </data>
+  <data name="Appointment" xml:space="preserve">
+    <value>Назначение</value>
+  </data>
+  <data name="Are the checkboxes set correctly - monthly/yearly repeat?" xml:space="preserve">
+    <value>Helyesen vannak-e beállítva a jelölőnégyzetek - havi/éves ismétlés?</value>
+  </data>
+  <data name="birthday" xml:space="preserve">
+    <value>день рождения</value>
+  </data>
+  <data name="Buddy" xml:space="preserve">
+    <value>Приятель</value>
+  </data>
+  <data name="Calendar view" xml:space="preserve">
+    <value>Просмотр календаря</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Отменить</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Подтвердить</value>
+  </data>
+  <data name="Confirm and save" xml:space="preserve">
+    <value>Подтвердите и сохраните</value>
+  </data>
+  <data name="Confirm deletion" xml:space="preserve">
+    <value>Подтвердить удаление</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Контакт</value>
+  </data>
+  <data name="Contact must have a name!" xml:space="preserve">
+    <value>У контакта должно быть имя!</value>
+  </data>
+  <data name="Contacts exported successfully!" xml:space="preserve">
+    <value>Контакты успешно экспортированы!</value>
+  </data>
+  <data name="Contacts need a name!" xml:space="preserve">
+    <value>Контакты должны иметь имя!</value>
+  </data>
+  <data name="Could not read ICS file!" xml:space="preserve">
+    <value>Не удалось прочитать ICS-файл!</value>
+  </data>
+  <data name="Do you really want to delete contact?" xml:space="preserve">
+    <value>Вы действительно хотите удалить контакт?</value>
+  </data>
+  <data name="Do you really want to delete date?" xml:space="preserve">
+    <value>Вы действительно хотите удалить дату?</value>
+  </data>
+  <data name="Do you want to delete the entire series (yes) or just this individual event (no)?" xml:space="preserve">
+    <value>Вы хотите удалить всю серию (да) или только это отдельное событие (нет)?</value>
+  </data>
+  <data name="email" xml:space="preserve">
+    <value>email</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>Конец</value>
+  </data>
+  <data name="Enter a town to look up its weather data!" xml:space="preserve">
+    <value>Введите город, чтобы посмотреть его погодные данные!</value>
+  </data>
+  <data name="export" xml:space="preserve">
+    <value>экспортировать</value>
+  </data>
+  <data name="felt" xml:space="preserve">
+    <value>felt</value>
+  </data>
+  <data name="filter" xml:space="preserve">
+    <value>фильтр</value>
+  </data>
+  <data name="givenname" xml:space="preserve">
+    <value>имя</value>
+  </data>
+  <data name="humidity" xml:space="preserve">
+    <value>влажность</value>
+  </data>
+  <data name="import" xml:space="preserve">
+    <value>импорт</value>
+  </data>
+  <data name="Info: If birthday is today or later, it will not be saved." xml:space="preserve">
+    <value>Информация: Если день рождения сегодня или позже, он не будет сохранен.</value>
+  </data>
+  <data name="JANUARY AGAIN!" xml:space="preserve">
+    <value>СНОВА ЯНВАРЬ!</value>
+  </data>
+  <data name="Left: current; right: forecast for following day" xml:space="preserve">
+    <value>Слева: текущее значение; справа: прогноз на следующий день</value>
+  </data>
+  <data name="maximal" xml:space="preserve">
+    <value>max</value>
+  </data>
+  <data name="minimal" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="monthly" xml:space="preserve">
+    <value>каждый месяц</value>
+  </data>
+  <data name="Multi-day appointments must not exceed the monthly limit." xml:space="preserve">
+    <value>Многодневные встречи не должны превышать месячный лимит.</value>
+  </data>
+  <data name="My Event" xml:space="preserve">
+    <value>событие</value>
+  </data>
+  <data name="Not a valid email!" xml:space="preserve">
+    <value>Неверный адрес электронной почты!</value>
+  </data>
+  <data name="Not a valid phone number!" xml:space="preserve">
+    <value>Неверный номер телефона!</value>
+  </data>
+  <data name="notes" xml:space="preserve">
+    <value>заметки</value>
+  </data>
+  <data name="phone" xml:space="preserve">
+    <value>телефон</value>
+  </data>
+  <data name="Pick day and below hour" xml:space="preserve">
+    <value>День и час - выбор:</value>
+  </data>
+  <data name="Pick hours" xml:space="preserve">
+    <value>Час - выбор:</value>
+  </data>
+  <data name="Rain quantity next hour" xml:space="preserve">
+    <value>Количество дождя в следующий час</value>
+  </data>
+  <data name="repetition" xml:space="preserve">
+    <value>повтор</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Начать</value>
+  </data>
+  <data name="surname" xml:space="preserve">
+    <value>фамилия</value>
+  </data>
+  <data name="Table view" xml:space="preserve">
+    <value>Просмотр таблицы</value>
+  </data>
+  <data name="temperature" xml:space="preserve">
+    <value>температура</value>
+  </data>
+  <data name="today" xml:space="preserve">
+    <value>сегодня</value>
+  </data>
+  <data name="tomorrow" xml:space="preserve">
+    <value>завтра</value>
+  </data>
+  <data name="Tomorrow's rain" xml:space="preserve">
+    <value>Завтрашний дождь</value>
+  </data>
+  <data name="Weather data for" xml:space="preserve">
+    <value>Данные о погоде за</value>
+  </data>
+  <data name="weekly individual til end of year" xml:space="preserve">
+    <value>еженедельные индивидуальные приемы до конца года</value>
+  </data>
+  <data name="whole day" xml:space="preserve">
+    <value>весь день</value>
+  </data>
+  <data name="winddirection" xml:space="preserve">
+    <value>направление ветра</value>
+  </data>
+  <data name="windspeed" xml:space="preserve">
+    <value>скорость ветра</value>
+  </data>
+  <data name="yearly" xml:space="preserve">
+    <value>каждый год</value>
+  </data>
+</root>
