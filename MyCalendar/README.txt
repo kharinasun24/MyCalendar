@@ -11,11 +11,13 @@ Die Kontakt-Ansicht erreicht man, indem man auf den Männchen-Button klickt. Dort
 
 Mit dem ICS-Button kann man eine Kalenderdatei im Google-Calendar-Format einlesen.
 
-Das Wolkensymbol kann geklicjt werden, wenn man in das Textfeld neben dem Wolkensymbol einen Ort eingibt - man erhält dann einige Wetterdaten.
+Das Wolkensymbol kann geklickt werden, wenn man in das Textfeld neben dem Wolkensymbol einen Ort eingibt - man erhält dann einige Wetterdaten.
 
 Rechts neben dem ICS-Button ist ein Chatbutton, der Gruppenchat funktioniert aber nur, wenn der Server up ist... 
 
-Ich habe eine sqlite-Datenbank namens cal.db mit folgendem Schema:
+----------------------------------------------SQL-MIGRATION-------------------------------------------------
+
+Es gibt in der App eine sqlite-Datenbank namens cal.db mit folgendem Schema:
 
 create table dates (id integer primary key autoincrement, text text, start text, end text, duration text, repeat text); 
 
