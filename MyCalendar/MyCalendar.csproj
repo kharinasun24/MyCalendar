@@ -12,6 +12,9 @@
     <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="Ical.Net" Version="4.3.1" />
     <PackageReference Include="MatriX" Version="2.1.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Nager.Date" Version="2.7.1" />
     <PackageReference Include="Nager.Holiday" Version="1.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -19,5 +22,18 @@
     <PackageReference Include="SQLite" Version="3.13.0" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
   </ItemGroup>
+
+<ItemGroup>
+  <None Update="appsettings.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+
+<ItemGroup>
+  <None Update="cal.db">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+
 
 </Project>

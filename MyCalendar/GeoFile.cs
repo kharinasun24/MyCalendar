@@ -221,6 +221,8 @@ namespace MyCalendar
             cities.Add("Qingdao");
             cities.Add("Quezon City");
             cities.Add("Quito");
+            cities.Add("Rastatt");
+            cities.Add("76437 Rastatt");
             cities.Add("Rangun");
             cities.Add("Rawalpindi");
             cities.Add("Riad");

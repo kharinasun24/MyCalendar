@@ -1,4 +1,5 @@
-﻿using MyCalendar.logger;
+﻿using Microsoft.Extensions.Configuration;
+using MyCalendar.logger;
 using System.Data;
 using System.Data.SQLite;
 
@@ -8,10 +9,16 @@ namespace MyCalendar
 {
     public class DateDao
     {
-
+        IConfiguration configuration;
 
         public DateDao()
         {
+
+            configuration = new ConfigurationBuilder()
+           .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+           .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // JSON-Datei laden
+           .Build();
+
         }
 
 
@@ -109,8 +116,12 @@ namespace MyCalendar
                 formattedMonthPreceding = month.ToString("D2");
             }
 
+          var configuration = new ConfigurationBuilder()
+         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // JSON-Datei laden
+         .Build();
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
@@ -157,7 +168,7 @@ namespace MyCalendar
         public List<Date> GetEntryById(string id)
         {
             var dates = new List<Date>();
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (var connection = new SQLiteConnection(connectionString))
             {
@@ -193,7 +204,7 @@ namespace MyCalendar
 
         public void DeleteEntryById(string id)
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -224,7 +235,7 @@ namespace MyCalendar
         {
             Date date = new Date(id, text, start, end, duration, repeat);
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
@@ -252,7 +263,7 @@ namespace MyCalendar
         {
             Date date = new Date("-1", text, start, end, duration, repeat);
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
@@ -277,7 +288,7 @@ namespace MyCalendar
 
         public void WriteExceptionIntoExceptionTBL(string idToDelete, string exceptionStart, string exceptionEnd)
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
@@ -321,7 +332,7 @@ namespace MyCalendar
             List<Date> dates = new List<Date>();
 
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();

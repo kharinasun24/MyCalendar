@@ -1,15 +1,29 @@
-﻿using System.Data.SQLite;
+﻿using Microsoft.Extensions.Configuration;
+using System.Data.SQLite;
 
 namespace MyCalendar
 {
     public class LanguageDao
     {
+        private IConfiguration configuration;
+
+        public LanguageDao() {
+
+            configuration = new ConfigurationBuilder()
+           .SetBasePath(AppDomain.CurrentDomain.BaseDirectory) 
+           .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // JSON-Datei laden
+           .Build();
+
+        }    
+
         public string GetCurrentLanguage()
         {
 
             string currentLanguage = "";
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
+
+            //string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -47,7 +61,7 @@ namespace MyCalendar
         }
         public void SetLanguage(string language)
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {

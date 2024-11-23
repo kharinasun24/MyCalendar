@@ -1,4 +1,5 @@
-﻿using MyCalendar;
+﻿using Microsoft.Extensions.Configuration;
+using MyCalendar;
 using System.Data;
 using System.Data.SQLite;
 
@@ -6,10 +7,22 @@ namespace MyCalendar
 {
     public class ContactDao
     {
+
+        IConfiguration configuration;
+
+        public ContactDao()
+        {
+
+            configuration = new ConfigurationBuilder()
+           .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+           .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // JSON-Datei laden
+           .Build();
+
+        }
         public DataTable GetContactsOrderByName()
         {
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             DataTable dt = new DataTable();
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -33,7 +46,7 @@ namespace MyCalendar
 
         public DataTable GetContactsOrderByIsCouple(string dateid)
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             DataTable dt = new DataTable();
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -59,7 +72,7 @@ namespace MyCalendar
         /*
               public DataTable GetContactsOrderByIsCouple(string dateid)
               {
-                  string connectionString = "Data Source=cal.db;Version=3;";
+                  string connectionString = configuration.GetConnectionString("SQLiteConnection");
                   DataTable dt = new DataTable();
 
                   using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -87,7 +100,7 @@ namespace MyCalendar
         {
 
             bool boolValue = false;
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
             string iscouple = "";
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -130,7 +143,7 @@ namespace MyCalendar
 
         public void ToggleCouple(string id, string clickedCellValue)
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             SQLiteConnection connection = new SQLiteConnection(connectionString);
 
@@ -179,7 +192,7 @@ namespace MyCalendar
         {
 
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -207,7 +220,7 @@ namespace MyCalendar
 
         public void CreateNewContact(string name, string nameGiven, string phone, string email, string birthday, string notes, string address, string addressstreet)
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -237,7 +250,7 @@ namespace MyCalendar
 
         public void UpdateContactWithId(string id, string name, string nameGiven, string phone, string email, string birthday, string notes, string address, string addressstreet)
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             SQLiteConnection connection = new SQLiteConnection(connectionString);
 
@@ -267,7 +280,7 @@ namespace MyCalendar
         {
             List<Contact> ctcs = new List<Contact>();
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -308,7 +321,7 @@ namespace MyCalendar
         {
             List<Contact> ctcs = new List<Contact>();
 
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -348,7 +361,7 @@ namespace MyCalendar
         public List<Contact> GetContactByContactId(string contid)
         {
             var contacts = new List<Contact>();
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (var connection = new SQLiteConnection(connectionString))
             {
@@ -386,7 +399,7 @@ namespace MyCalendar
 
         public void DeleteAllDates()
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -428,7 +441,7 @@ namespace MyCalendar
 
         public void DeleteAllContacts()
         {
-            string connectionString = "Data Source=cal.db;Version=3;";
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
