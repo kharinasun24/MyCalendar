@@ -44,7 +44,7 @@ namespace MyCalendar
 
             doublesButton = new Button
             {
-                Text = "DD",
+                Text = "Duplex",
                 Location = new Point(120, 10),
                 AutoSize = true,
             };

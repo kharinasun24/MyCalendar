@@ -1,6 +1,50 @@
 ﻿
+using Matrix.Xmpp.StreamManagement;
+
 namespace MyCalendar
 {
+
+    public partial class DuplicateContactsForm : Form
+    {
+        public DuplicateContactsForm(List<string[]> potentialDoubles)
+        {
+            InitializeComponent();
+
+            listBoxPotentialDoubles.Items.Add("Duplex:");
+
+            foreach (string[] dbl in potentialDoubles)
+            {
+                string result = string.Join(", ", dbl);
+                listBoxPotentialDoubles.Items.Add(result);
+            }
+        }
+
+        private System.Windows.Forms.ListBox listBoxPotentialDoubles;
+
+        private void InitializeComponent()
+        {
+            this.listBoxPotentialDoubles = new System.Windows.Forms.ListBox();
+            this.SuspendLayout();
+            // 
+            // listBoxPotentialDoubles
+            // 
+            this.listBoxPotentialDoubles.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listBoxPotentialDoubles.FormattingEnabled = true;
+            this.listBoxPotentialDoubles.ItemHeight = 16;
+            this.listBoxPotentialDoubles.Location = new System.Drawing.Point(0, 0);
+            this.listBoxPotentialDoubles.Size = new System.Drawing.Size(800, 450);
+            this.listBoxPotentialDoubles.TabIndex = 0;
+            // 
+            // DuplicateContactsForm
+            // 
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.listBoxPotentialDoubles);
+            this.ResumeLayout(false);
+        }
+
+    }
+
+
     public class Doubles
     {
         public Doubles()
@@ -91,18 +135,14 @@ namespace MyCalendar
 
             List<string[]> potentialDoubles = SortStringsByLevenshteinDistance(names, 2);
 
+            string title = "Potential double contacts";
 
-            string potentialDbls = "Potential double contacts: ";
-            //Hier sind die Dubletten...
-            foreach (string[] dbl in potentialDoubles)
+            if (potentialDoubles.Count > 0)
             {
-                string result = string.Join(", ", dbl);
-                potentialDbls += result;
-                potentialDbls += " ";
+                DuplicateContactsForm duplicatesForm = new DuplicateContactsForm(potentialDoubles);
+                duplicatesForm.ShowDialog();
             }
 
-
-            MessageBox.Show(potentialDbls);
         }
 
         private List<string> AllContactNames()
