@@ -17,6 +17,7 @@ namespace MyCalendar
         private LanguageDao languageDao;
 
         private TextBox filterTextBox;
+        private Button doublesButton;
 
         private DataGridView dataGridContactAdd;
 
@@ -40,6 +41,17 @@ namespace MyCalendar
             filterTextBox.TextChanged += FilterTextBox_TextChanged;
 
             Controls.Add(filterTextBox);
+
+            doublesButton = new Button
+            {
+                Text = "DD",
+                Location = new Point(120, 10),
+                AutoSize = true,
+            };
+
+            doublesButton.Click += FilterTextButton_Click;
+
+            Controls.Add(doublesButton);
 
             Button addContactButton = new Button
             {
@@ -100,6 +112,14 @@ namespace MyCalendar
             Controls.Add(importButton);
 
             DrawContacts();
+
+        }
+
+        private void FilterTextButton_Click(object? sender, EventArgs e)
+        {
+            Doubles doubles = new Doubles();
+
+            doubles.ShowDoubles(3); //MAX LEVENSHTEIN DISTANCE ARGUMENT IS NOT SUPPOSED TO BE LT 2!
 
         }
 
