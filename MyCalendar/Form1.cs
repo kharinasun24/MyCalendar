@@ -150,9 +150,11 @@ namespace MyCalendar
 
             Controls.Add(addContactButton);
 
+            //TODO: BUG! Beim Einlesen der Datei erscheint der neue Termin nicht. 
+            //Erst wenn der Kalender neu gestartet wird. Dies ist kein Zustand...
             Button readIcsButton = new Button
             {
-                Text = "ICS",
+                Text = "ICS", 
                 Location = new Point(10, 320),
                 AutoSize = true,
                 Size = new Size(100, 50)
