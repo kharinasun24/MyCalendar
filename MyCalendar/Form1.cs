@@ -2,9 +2,6 @@
 using System.Globalization;
 using System.Resources;
 using System.Security.Principal;
-using System.Windows.Forms;
-using MyCalendar.logger;
-using Nager.Date.Models;
 using Nager.Holiday;
 
 
@@ -150,8 +147,7 @@ namespace MyCalendar
 
             Controls.Add(addContactButton);
 
-            //TODO: BUG! Beim Einlesen der Datei erscheint der neue Termin nicht. 
-            //Erst wenn der Kalender neu gestartet wird. Dies ist kein Zustand...
+
             Button readIcsButton = new Button
             {
                 Text = "ICS", 
@@ -725,6 +721,13 @@ namespace MyCalendar
             Reader icsReader = new Reader();
 
             icsReader.ReadICS();
+
+            //TODO: BUG! Beim Einlesen der Datei erscheint der neue Termin nicht. 
+            //Erst wenn der Kalender neu gestartet wird. Dies ist kein Zustand. Restart ist erstmal eine
+            //Behelfslösung...
+            Application.Restart();
+            Environment.Exit(0);
+
         }
 
 
