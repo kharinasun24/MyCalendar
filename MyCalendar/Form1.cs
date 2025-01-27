@@ -722,8 +722,8 @@ namespace MyCalendar
 
             icsReader.ReadICS();
 
-            //TODO: BUG! Beim Einlesen der Datei erscheint der neue Termin nicht. 
-            //Erst wenn der Kalender neu gestartet wird. Dies ist kein Zustand. Restart ist erstmal eine
+            //TODO: Beim Einlesen der Datei erscheint der neue Termin 
+            //erst wenn der Kalender neu gestartet wird. Restart ist eine
             //Behelfslösung...
             Application.Restart();
             Environment.Exit(0);
