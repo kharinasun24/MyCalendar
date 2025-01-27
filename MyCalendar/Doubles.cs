@@ -114,7 +114,7 @@ namespace MyCalendar
                 string next = strings[i + 1];
                 int distance = LevenshteinDistance(current, next);
 
-                if (distance > 0 && distance < barrier)
+                if (distance >= 0 && distance < barrier)
                 {
                     filteredStrings.Add([current, next]);
 
@@ -133,16 +133,14 @@ namespace MyCalendar
             //Gegeben:
             List<string> names = AllContactNames();
 
-            List<string[]> potentialDoubles = SortStringsByLevenshteinDistance(names, 2);
+            List<string[]> potentialDoubles = SortStringsByLevenshteinDistance(names, lev);
 
             string title = "Potential double contacts";
 
-            if (potentialDoubles.Count > 0)
-            {
+            
                 DuplicateContactsForm duplicatesForm = new DuplicateContactsForm(potentialDoubles);
                 duplicatesForm.ShowDialog();
-            }
-
+            
         }
 
         private List<string> AllContactNames()
