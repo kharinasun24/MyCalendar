@@ -284,16 +284,16 @@ namespace MyCalendar
             Controls.Add(flowLayoutPanel);
 
 
-            Button xxXXButton = new System.Windows.Forms.Button
+            Button chtButton = new System.Windows.Forms.Button
             {
                 Text = " - 👥 - ",
                 Location = new Point(120, 320),
                 AutoSize = true
             };
 
-            xxXXButton.Click += ctButton_Click;
+            chtButton.Click += ctButton_Click;
 
-            Controls.Add(xxXXButton);
+            Controls.Add(chtButton);
 
 
         }

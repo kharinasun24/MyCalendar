@@ -172,28 +172,7 @@ namespace MyCalendar
         }
 
 
-        /*
-        public async Task ConnectAsync()
-        {
-            using (webSocket = new ClientWebSocket())
-            {
-                Uri serverUri = new Uri($"ws://{GetIPv4()}:8080");
-
-                try
-                {
-                    await webSocket.ConnectAsync(serverUri, CancellationToken.None);
-                    Console.WriteLine("Connected to the server."); 
-                    ToggleOnlineStatus(true);
-                    await ReceiveMessages(webSocket);
-                }
-                catch (WebSocketException ex)
-                {
-                    Console.WriteLine($"WebSocket error during send: {ex.Message}"); 
-                    ToggleOnlineStatus(false);
-                }
-            }
-        }
-        */
+        
 
         private async Task SendMessage(ClientWebSocket webSocket, string message)
         {
