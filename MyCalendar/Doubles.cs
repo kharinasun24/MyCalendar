@@ -127,7 +127,6 @@ namespace MyCalendar
 
 
 
-        //TODO: Ready for testing.
         public void ShowDoubles(int lev)
         {
             //Gegeben:

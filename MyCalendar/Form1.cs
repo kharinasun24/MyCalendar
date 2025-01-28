@@ -263,8 +263,8 @@ namespace MyCalendar
             };
             showWeatherButton.Click += ShowWeatherButton_Click;
 
-            // Füge den Button zum FlowLayoutPanel hinzu
-            flowLayoutPanel.Controls.Add(showWeatherButton);
+            // TODO Füge noch den Button zum FlowLayoutPanel hinzu
+            //flowLayoutPanel.Controls.Add(showWeatherButton);
 
             // Erstelle das Textfeld "location"
             location = new TextBox
@@ -274,8 +274,8 @@ namespace MyCalendar
 
             location.KeyDown += new KeyEventHandler(ShowWeatherLocation_KeyDown);
 
-            // Füge das Textfeld zum FlowLayoutPanel hinzu
-            flowLayoutPanel.Controls.Add(location);
+            // TODO Füge noch das Textfeld zum FlowLayoutPanel hinzu
+            //flowLayoutPanel.Controls.Add(location);
 
             flowLayoutPanel.Controls.Add(languageComboBox);
 
@@ -722,9 +722,6 @@ namespace MyCalendar
 
             icsReader.ReadICS();
 
-            //TODO: Beim Einlesen der Datei erscheint der neue Termin 
-            //erst wenn der Kalender neu gestartet wird. Restart ist eine
-            //Behelfslösung...
             Application.Restart();
             Environment.Exit(0);
 
