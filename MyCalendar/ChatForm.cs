@@ -10,11 +10,12 @@ namespace MyCalendar
     {
         private ClientWebSocket webSocket;
         private DataGridView dataGridView;
-        private RichTextBox textRichTextBox;
-        private RichTextBox chatRichTextBox;
+        private RichTextBox chatWindow;
+        //private RichTextBox textRichTextBox;
+        //private RichTextBox chatRichTextBox;
         private Button closeButton;
         private Button isOnButton;
-        private Dictionary<string, (ClientWebSocket, ChatForm)> activeChats = new();
+        private Dictionary<string, (ClientWebSocket, ChatWindow)> activeChats = new();
 
         private bool isCloseButtonClicked = false;
 
@@ -38,9 +39,9 @@ namespace MyCalendar
         {
             if (activeChats.ContainsKey(onionAddress)) return; // Falls bereits verbunden, nichts tun
 
-            var chatForm = new ChatForm(); //TODO: Das ist eben nicht unsere ChatForm, welche aufgehen soll.
-            chatForm.Text = $"Chat mit {onionAddress}";
-            chatForm.Show();
+            var chatWindow = new ChatWindow(onionAddress); //TODO: Das ist eben nicht unsere ChatForm, welche aufgehen soll.
+            chatWindow.Text = $"Chat mit {onionAddress}";
+            chatWindow.Show();
 
             var webSocket = CreateTorWebSocket(); // Tor-WebSocket nutzen
             Uri serverUri = new Uri($"ws://{onionAddress}");
@@ -48,20 +49,21 @@ namespace MyCalendar
             try
             {
                 await webSocket.ConnectAsync(serverUri, CancellationToken.None);
-                chatForm.AppendMessage("Verbunden mit " + onionAddress);
-                activeChats[onionAddress] = (webSocket, chatForm);
+                chatWindow.AppendMessage("Verbunden mit " + onionAddress);
 
+                activeChats[onionAddress] = (webSocket, chatWindow);
+                
                 // Starte das Empfangen von Nachrichten
-                _ = ReceiveMessages(webSocket, chatForm);
+                _ = ReceiveMessages(webSocket, chatWindow);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Fehler beim Verbinden mit {onionAddress}: {ex.Message}");
-                chatForm.Close();
+                chatWindow.Close();
             }
         }
 
-        private async Task ReceiveMessages(ClientWebSocket webSocket, ChatForm chatForm)
+        private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWindow)
         {
             byte[] buffer = new byte[1024];
             try
@@ -75,18 +77,20 @@ namespace MyCalendar
                     }
 
                     string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    chatForm.AppendMessage(message);
+                    chatWindow.AppendMessage(message);
                 }
             }
             catch (Exception ex)
             {
-                chatForm.AppendMessage($"Fehler beim Empfang: {ex.Message}");
+                chatWindow.AppendMessage($"Fehler beim Empfang: {ex.Message}");
             }
             finally
             {
-                CloseChat(chatForm.Text);
+                CloseChat(chatWindow.Text);
             }
         }
+
+       
 
         private void CloseChat(string onionAddress)
         {
@@ -99,7 +103,7 @@ namespace MyCalendar
                     webSocket.Abort();
                 }
 
-                chatForm.Close();
+                chatForm.Close(); // Korrektur hier!
                 activeChats.Remove(onionAddress);
             }
         }
@@ -272,11 +276,11 @@ namespace MyCalendar
             // Lade die Einträge aus der buddy-list.txt
             LoadBuddyList();
 
-            textRichTextBox = CreateRichTextBox(new Point(10, 10), new Size(550, 120), readOnly: true);
+            //textRichTextBox = CreateRichTextBox(new Point(10, 10), new Size(550, 120), readOnly: true);
             //Controls.Add(textRichTextBox);
 
-            chatRichTextBox = CreateRichTextBox(new Point(10, 150), new Size(550, 100), readOnly: false);
-            chatRichTextBox.KeyPress += ChatRichTextBox_KeyPress;
+            //chatRichTextBox = CreateRichTextBox(new Point(10, 150), new Size(550, 100), readOnly: false);
+            //chatRichTextBox.KeyPress += ChatRichTextBox_KeyPress;
             //Controls.Add(chatRichTextBox);
 
             isOnButton = CreateButton(new Point(400, 320));
