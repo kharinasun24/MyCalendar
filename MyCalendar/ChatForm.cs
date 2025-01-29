@@ -14,6 +14,8 @@ namespace MyCalendar
         private RichTextBox chatRichTextBox;
         private Button closeButton;
         private Button isOnButton;
+        private Dictionary<string, (ClientWebSocket, ChatForm)> activeChats = new();
+
         private bool isCloseButtonClicked = false;
 
         private string DefaultName = "";
@@ -22,20 +24,106 @@ namespace MyCalendar
         {
             Size = new Size(600, 400);
             InitializeComponents();
-            InitializeWebSocketClient();
-            FormClosing += OnFormClosing;
+            //InitializeWebSocketClient();
+            //FormClosing += OnFormClosing;
         }
 
       
+
+
+        ///////////////////////////////////NEW////////////////////////////////////////
+
+
+        private async Task StartChat(string onionAddress)
+        {
+            if (activeChats.ContainsKey(onionAddress)) return; // Falls bereits verbunden, nichts tun
+
+            var chatForm = new ChatForm(); //TODO: Das ist eben nicht unsere ChatForm, welche aufgehen soll.
+            chatForm.Text = $"Chat mit {onionAddress}";
+            chatForm.Show();
+
+            var webSocket = CreateTorWebSocket(); // Tor-WebSocket nutzen
+            Uri serverUri = new Uri($"ws://{onionAddress}");
+
+            try
+            {
+                await webSocket.ConnectAsync(serverUri, CancellationToken.None);
+                chatForm.AppendMessage("Verbunden mit " + onionAddress);
+                activeChats[onionAddress] = (webSocket, chatForm);
+
+                // Starte das Empfangen von Nachrichten
+                _ = ReceiveMessages(webSocket, chatForm);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Verbinden mit {onionAddress}: {ex.Message}");
+                chatForm.Close();
+            }
+        }
+
+        private async Task ReceiveMessages(ClientWebSocket webSocket, ChatForm chatForm)
+        {
+            byte[] buffer = new byte[1024];
+            try
+            {
+                while (webSocket.State == WebSocketState.Open)
+                {
+                    var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        break;
+                    }
+
+                    string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    chatForm.AppendMessage(message);
+                }
+            }
+            catch (Exception ex)
+            {
+                chatForm.AppendMessage($"Fehler beim Empfang: {ex.Message}");
+            }
+            finally
+            {
+                CloseChat(chatForm.Text);
+            }
+        }
+
+        private void CloseChat(string onionAddress)
+        {
+            if (activeChats.TryGetValue(onionAddress, out var chatData))
+            {
+                var (webSocket, chatForm) = chatData;
+
+                if (webSocket?.State == WebSocketState.Open)
+                {
+                    webSocket.Abort();
+                }
+
+                chatForm.Close();
+                activeChats.Remove(onionAddress);
+            }
+        }
+
+
+        public ClientWebSocket CreateTorWebSocket()
+        {
+            var clientWebSocket = new ClientWebSocket();
+            var options = clientWebSocket.Options;
+
+            options.Proxy = new WebProxy("http://127.0.0.1:8118"); // Privoxy-Port.
+            return clientWebSocket;
+        }
+
+
+        /////////////////////////////////////OLD//////////////////////////////////////////////////////////
+        /*
+          
         private async void InitializeWebSocketClient()
         {
             await ConnectAsync();
         }
-
-
-
-   
-
+ 
+         
         public async Task ConnectAsync()
         {
             Uri serverUri = new Uri("ws://yourhiddenserviceaddress.onion");
@@ -75,7 +163,7 @@ namespace MyCalendar
             return clientWebSocket;
         }
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////////
+      
 
         private async void ChatRichTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -170,7 +258,7 @@ namespace MyCalendar
             }
         }
 
-
+        */
         ///////////////////////////////////////////////////////////////////////////////////////////////////
 
         private void InitializeComponents()
@@ -208,6 +296,8 @@ namespace MyCalendar
                 RowHeadersVisible = false, // Keine Zeilenköpfe anzeigen
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill // Spaltenbreite automatisch anpassen
             };
+
+            dataGridView.CellContentClick += dataGridView_CellContentClick;
 
             // Spalten hinzufügen
             var checkColumn = new DataGridViewCheckBoxColumn
@@ -285,13 +375,15 @@ namespace MyCalendar
             return button;
         }
 
-        //TODO: Das Ziel ist jetzt halt: Der wählt eine CheckBox oder mehrere, und es gehen so viele Chatfenster auf wie Checkboxen gewählt sind...  
+ 
         private void LoadBuddyList()
         {
             try
             {
                 // Pfad zur buddy-list.txt bestimmen
-                string filePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\MyCalendar\buddy-list.txt"));
+                //string filePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\MyCalendar\buddy-list.txt"));
+
+                string filePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"buddy-list.txt"));
 
                 if (File.Exists(filePath))
                 {
@@ -311,6 +403,9 @@ namespace MyCalendar
                             if (me < 1)
                             {
                                 dataGridView.Rows.Add(true, name, address); // Erste Spalte Checkbox, dann Name, dann Adresse
+                                DataGridViewCheckBoxCell checkBoxCell = (DataGridViewCheckBoxCell)dataGridView.Rows[0].Cells[0];
+                                checkBoxCell.ReadOnly = true;
+
                             }
                             else {
                                 dataGridView.Rows.Add(false, name, address); // Erste Spalte Checkbox, dann Name, dann Adresse
@@ -350,13 +445,35 @@ namespace MyCalendar
             }
         }
 
-
-        private void OnFormClosing(object sender, FormClosingEventArgs e)
+        private async void dataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (!isCloseButtonClicked)
+            // Prüfen, ob eine Checkbox-Spalte angeklickt wurde (0 = linkeste Spalte)
+            if (e.ColumnIndex == 0 && e.RowIndex >= 0)
             {
-                e.Cancel = true;
+                DataGridViewCheckBoxCell checkBoxCell = (DataGridViewCheckBoxCell)dataGridView.Rows[e.RowIndex].Cells[0];
+                bool isChecked = (bool)checkBoxCell.Value;
+
+                string buddyOnion = dataGridView.Rows[e.RowIndex].Cells[2].Value.ToString(); // Rechte Spalte = Onion-Adresse
+
+                if (isChecked)
+                {
+                    // Verbindung starten
+                    await StartChat(buddyOnion);
+                }
+                else
+                {
+                    // Verbindung trennen
+                    CloseChat(buddyOnion);
+                }
             }
         }
+
+        //private void OnFormClosing(object sender, FormClosingEventArgs e)
+        //{
+        //    if (!isCloseButtonClicked)
+        //    {
+        //        e.Cancel = true;
+        //    }
+        //}
     }
 }

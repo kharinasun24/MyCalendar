@@ -261,9 +261,9 @@ namespace MyCalendar
                 Text = "  🌦  ",
                 AutoSize = true
             };
-            showWeatherButton.Click += ShowWeatherButton_Click;
+            //showWeatherButton.Click += ShowWeatherButton_Click;
 
-            // TODO Füge noch den Button zum FlowLayoutPanel hinzu
+
             //flowLayoutPanel.Controls.Add(showWeatherButton);
 
             // Erstelle das Textfeld "location"
@@ -272,9 +272,9 @@ namespace MyCalendar
                 AutoSize = true
             };
 
-            location.KeyDown += new KeyEventHandler(ShowWeatherLocation_KeyDown);
+            //location.KeyDown += new KeyEventHandler(ShowWeatherLocation_KeyDown);
 
-            // TODO Füge noch das Textfeld zum FlowLayoutPanel hinzu
+
             //flowLayoutPanel.Controls.Add(location);
 
             flowLayoutPanel.Controls.Add(languageComboBox);
@@ -660,7 +660,8 @@ namespace MyCalendar
         {
 
             ChatForm ctForm = new ChatForm();
-            ctForm.ShowDialog();
+            //ctForm.ShowDialog();
+            ctForm.Show();
 
 
         }
@@ -841,6 +842,7 @@ namespace MyCalendar
             }
         }
 
+        /*
 
         private void ShowWeatherLocation_KeyDown(object sender, KeyEventArgs e)
         {
@@ -875,6 +877,8 @@ namespace MyCalendar
 
             }
         }
+
+        */
 
         private void Placeholder_Click(object? sender, EventArgs e)
         {

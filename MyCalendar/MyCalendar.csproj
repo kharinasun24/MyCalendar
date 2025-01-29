@@ -35,5 +35,10 @@
   </None>
 </ItemGroup>
 
+  <ItemGroup>
+    <None Update="buddy-list.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+</ItemGroup>
 
 </Project>
