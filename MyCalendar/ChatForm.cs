@@ -29,8 +29,7 @@ namespace MyCalendar
             //FormClosing += OnFormClosing;
         }
 
-      
-
+ 
 
         ///////////////////////////////////NEW////////////////////////////////////////
 
@@ -39,7 +38,7 @@ namespace MyCalendar
         {
             if (activeChats.ContainsKey(onionAddress)) return; // Falls bereits verbunden, nichts tun
 
-            var chatWindow = new ChatWindow(onionAddress); //TODO: Das ist eben nicht unsere ChatForm, welche aufgehen soll.
+            var chatWindow = new ChatWindow(onionAddress);
             chatWindow.Text = $"Chat mit {onionAddress}";
             chatWindow.Show();
 
@@ -301,7 +300,9 @@ namespace MyCalendar
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill // Spaltenbreite automatisch anpassen
             };
 
-            dataGridView.CellContentClick += dataGridView_CellContentClick;
+            dataGridView.CurrentCellDirtyStateChanged += dataGridView_CurrentCellDirtyStateChanged;
+            dataGridView.CellValueChanged += dataGridView_CellValueChanged;
+
 
             // Spalten hinzufügen
             var checkColumn = new DataGridViewCheckBoxColumn
@@ -329,6 +330,14 @@ namespace MyCalendar
 
             // DataGridView zur Form hinzufügen
             Controls.Add(dataGridView);
+        }
+
+        private void dataGridView_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+        {
+            if (dataGridView.CurrentCell is DataGridViewCheckBoxCell)
+            {
+                dataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit); // Änderung sofort übernehmen
+            }
         }
 
 
@@ -435,7 +444,7 @@ namespace MyCalendar
             Close();
         }
 
-
+        //TODO: Das in jede Grid-Line...
         private void ToggleOnlineStatus(bool status)
         {
             if (status)
@@ -449,9 +458,9 @@ namespace MyCalendar
             }
         }
 
-        private async void dataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            // Prüfen, ob eine Checkbox-Spalte angeklickt wurde (0 = linkeste Spalte)
+            // Prüfen, ob eine Checkbox-Spalte geändert wurde (0 = linkeste Spalte)
             if (e.ColumnIndex == 0 && e.RowIndex >= 0)
             {
                 DataGridViewCheckBoxCell checkBoxCell = (DataGridViewCheckBoxCell)dataGridView.Rows[e.RowIndex].Cells[0];
@@ -461,16 +470,15 @@ namespace MyCalendar
 
                 if (isChecked)
                 {
-                    // Verbindung starten
-                    await StartChat(buddyOnion);
+                    await StartChat(buddyOnion); // Chat starten
                 }
                 else
                 {
-                    // Verbindung trennen
-                    CloseChat(buddyOnion);
+                    CloseChat(buddyOnion); // Chat schließen
                 }
             }
         }
+
 
         //private void OnFormClosing(object sender, FormClosingEventArgs e)
         //{

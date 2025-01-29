@@ -1,2 +1,2 @@
-xxxxxxxxxxxx.onion me
-yyyyyyyyyyyy.onion you
+xxxxxxxxxxxx.onionadresse me
+yyyyyyyyyyyy.onionadresse you
