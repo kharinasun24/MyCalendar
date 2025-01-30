@@ -41,6 +41,12 @@
     </None>
 </ItemGroup>
 
+    <ItemGroup>
+    <None Update="tor.exe">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+</ItemGroup>
+  
   <ItemGroup>
     <Content Include="tor_hidden_service\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

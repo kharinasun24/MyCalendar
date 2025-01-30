@@ -1,7 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Net.Sockets;
-using System.Text;
 
 namespace MyCalendar
 {
@@ -10,6 +8,45 @@ namespace MyCalendar
         private const string TorControlHost = "127.0.0.1";
         private const int TorControlPort = 9051;
         private const string HiddenServiceDir = "tor_hidden_service"; // Relativer Pfad
+
+
+        public void StartTorService()
+        {
+            try
+            {
+                // 1. Tor-Prozess starten
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "tor.exe", // Pfad zu Ihrer tor.exe-Datei
+                                          // Weitere Optionen für tor.exe, z.B. Konfigurationsdatei
+                                          // Arguments = "-f torrc.conf",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using (Process torProcess = new Process { StartInfo = startInfo })
+                {
+                    torProcess.Start();
+
+                    // Ausgaben von Tor überwachen (optional)
+                    torProcess.OutputDataReceived += (sender, e) => Console.WriteLine("Tor Output: " + e.Data);
+                    torProcess.ErrorDataReceived += (sender, e) => Console.WriteLine("Tor Error: " + e.Data);
+
+                    // 2. Verzeichnis erstellen und Hidden Service konfigurieren (wie bisher)
+                    Directory.CreateDirectory(HiddenServiceDir);
+                    // ... (Rest Ihres Codes)
+
+                    // 3. Warten, bis der Tor-Prozess beendet ist (optional)
+                    // torProcess.WaitForExit();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Fehler beim Starten von Tor: " + ex.Message);
+            }
+        }
+
 
         public void SetupHiddenService()
         {
