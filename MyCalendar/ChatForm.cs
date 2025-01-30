@@ -8,31 +8,27 @@ namespace MyCalendar
 {
     public partial class ChatForm : Form
     {
-        private ClientWebSocket webSocket;
         private DataGridView dataGridView;
-        private RichTextBox chatWindow;
-        //private RichTextBox textRichTextBox;
-        //private RichTextBox chatRichTextBox;
         private Button closeButton;
         private Button isOnButton;
         private Dictionary<string, (ClientWebSocket, ChatWindow)> activeChats = new();
 
-        private bool isCloseButtonClicked = false;
-
-        private string DefaultName = "";
-
         public ChatForm()
         {
             Size = new Size(600, 400);
+            
+            CreateHiddeService();
+            
             InitializeComponents();
-            //InitializeWebSocketClient();
-            //FormClosing += OnFormClosing;
         }
 
- 
 
-        ///////////////////////////////////NEW////////////////////////////////////////
+        private void CreateHiddeService() {
 
+            TorHiddenService ths = new TorHiddenService();
+            ths.SetupHiddenService();
+
+        }
 
         private async Task StartChat(string onionAddress)
         {
@@ -50,10 +46,11 @@ namespace MyCalendar
                 await webSocket.ConnectAsync(serverUri, CancellationToken.None);
                 chatWindow.AppendMessage("Verbunden mit " + onionAddress);
 
+                // Verbindung in Dictionary speichern
                 activeChats[onionAddress] = (webSocket, chatWindow);
-                
-                // Starte das Empfangen von Nachrichten
-                _ = ReceiveMessages(webSocket, chatWindow);
+
+                // Nachrichtenempfang starten
+                _ = Task.Run(() => ReceiveMessages(webSocket, chatWindow));
             }
             catch (Exception ex)
             {
@@ -62,207 +59,41 @@ namespace MyCalendar
             }
         }
 
-        private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWindow)
+
+        
+
+private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWindow)
+{
+    byte[] buffer = new byte[1024];
+
+    try
+    {
+        while (webSocket.State == WebSocketState.Open)
         {
-            byte[] buffer = new byte[1024];
-            try
-            {
-                while (webSocket.State == WebSocketState.Open)
-                {
-                    var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    if (result.MessageType == WebSocketMessageType.Close)
-                    {
-                        break;
-                    }
+            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
 
-                    string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    chatWindow.AppendMessage(message);
-                }
-            }
-            catch (Exception ex)
-            {
-                chatWindow.AppendMessage($"Fehler beim Empfang: {ex.Message}");
-            }
-            finally
-            {
-                CloseChat(chatWindow.Text);
-            }
+            // UI-Thread-Aufruf, um die Nachricht im Chat-Fenster anzuzeigen
+            chatWindow.Invoke((MethodInvoker)(() => chatWindow.AppendMessage($"Buddy: {message}")));
         }
-
-       
-
-        private void CloseChat(string onionAddress)
-        {
-            if (activeChats.TryGetValue(onionAddress, out var chatData))
-            {
-                var (webSocket, chatForm) = chatData;
-
-                if (webSocket?.State == WebSocketState.Open)
-                {
-                    webSocket.Abort();
-                }
-
-                chatForm.Close(); // Korrektur hier!
-                activeChats.Remove(onionAddress);
-            }
-        }
-
+    }
+    catch (Exception ex)
+    {
+        chatWindow.Invoke((MethodInvoker)(() => chatWindow.AppendMessage($"Verbindung getrennt: {ex.Message}")));
+    }
+}
 
         public ClientWebSocket CreateTorWebSocket()
         {
             var clientWebSocket = new ClientWebSocket();
             var options = clientWebSocket.Options;
 
-            options.Proxy = new WebProxy("http://127.0.0.1:8118"); // Privoxy-Port.
+            // Tor SOCKS5-Proxy (Standardport: 9050)
+            options.Proxy = new WebProxy("socks5://127.0.0.1:9050");
+
             return clientWebSocket;
         }
 
-
-        /////////////////////////////////////OLD//////////////////////////////////////////////////////////
-        /*
-          
-        private async void InitializeWebSocketClient()
-        {
-            await ConnectAsync();
-        }
- 
-         
-        public async Task ConnectAsync()
-        {
-            Uri serverUri = new Uri("ws://yourhiddenserviceaddress.onion");
-
-            while (true)
-            {
-                using (webSocket = CreateTorWebSocket())
-                {
-                    try
-                    {
-                        Console.WriteLine("Versuche Verbindung zu Hidden Service herzustellen...");
-                        await webSocket.ConnectAsync(serverUri, CancellationToken.None);
-
-                        Console.WriteLine("Mit dem Hidden Service verbunden.");
-                        ToggleOnlineStatus(true);
-                        await ReceiveMessages(webSocket);
-                        break;
-                    }
-                    catch (WebSocketException ex)
-                    {
-                        Console.WriteLine($"WebSocket-Fehler beim Verbindungsversuch: {ex.Message}");
-                        ToggleOnlineStatus(false);
-                        Console.WriteLine("Erneuter Verbindungsversuch in 5 Sekunden...");
-
-                        await Task.Delay(5000);
-                    }
-                }
-            }
-        }
-
-        public ClientWebSocket CreateTorWebSocket()
-        {
-            var clientWebSocket = new ClientWebSocket();
-            var options = clientWebSocket.Options;
-
-            options.Proxy = new WebProxy("http://127.0.0.1:8118"); // Privoxy-Port.
-            return clientWebSocket;
-        }
-
-      
-
-        private async void ChatRichTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // Benutzername
-            string me = "me";
-
-            // Prüfen, ob Enter gedrückt wurde
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                e.Handled = true; // Unterdrückt den Zeilenumbruch in der RichTextBox
-
-                // Nachricht formatieren
-                string message = $"{DateTime.Now:HH:mm} {chatRichTextBox.Text.Trim()}";
-
-                // Nachricht in der eigenen RichTextBox anzeigen
-                chatRichTextBox.Clear(); // Eingabe zurücksetzen
-                textRichTextBox.AppendText($"{me} {message}\n"); // Nachricht zur Anzeige hinzufügen
-
-                // Nachricht an den Buddy senden
-                if (webSocket != null && webSocket.State == WebSocketState.Open)
-                {
-                    await SendMessage(webSocket, message);
-                }
-                else
-                {
-                    // WebSocket ist nicht verbunden, Benutzer informieren
-                    textRichTextBox.AppendText("WebSocket ist nicht verbunden. Nachricht konnte nicht gesendet werden.\n");
-                }
-            }
-        }
-
-        private async Task SendMessage(ClientWebSocket webSocket, string message)
-        {
-            try
-            {
-                // Nachricht in Bytes konvertieren und senden
-                byte[] buffer = Encoding.UTF8.GetBytes(message);
-                await webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Fehler beim Senden der Nachricht: {ex.Message}");
-                textRichTextBox.AppendText($"Fehler beim Senden der Nachricht: {ex.Message}\n");
-            }
-        }
-
-
-        private async Task ReceiveMessages(ClientWebSocket webSocket)
-        {
-            byte[] buffer = new byte[1024];
-
-            try
-            {
-                while (webSocket.State == WebSocketState.Open)
-                {
-                    // Empfangene Nachrichten lesen
-                    WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
-                    if (result.MessageType == WebSocketMessageType.Close)
-                    {
-                        // Verbindung wurde vom Server geschlossen
-                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Server closed the connection", CancellationToken.None);
-                        Console.WriteLine("Verbindung vom Server geschlossen.");
-                        ToggleOnlineStatus(false);
-                        break;
-                    }
-
-                    // Nachricht in UTF-8 dekodieren und anzeigen
-
-                    string serverMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    textRichTextBox.Invoke((MethodInvoker)(() => textRichTextBox.AppendText(serverMessage + Environment.NewLine)));
-
-                    Console.WriteLine($"Nachricht vom Server: {serverMessage}");
-                }
-            }
-            catch (WebSocketException ex)
-            {
-                // Spezifische Fehler für WebSockets
-                Console.WriteLine($"WebSocket-Fehler beim Empfang: {ex.Message}");
-                ToggleOnlineStatus(false);
-
-                // Option: Automatischer Wiederverbindungsversuch
-                Console.WriteLine("Erneuter Verbindungsaufbau in 5 Sekunden...");
-                await Task.Delay(5000);
-                await ConnectAsync(); // Wiederverbindung starten
-            }
-            catch (Exception ex)
-            {
-                // Allgemeine Fehler
-                Console.WriteLine($"Allgemeiner Fehler: {ex.Message}");
-                ToggleOnlineStatus(false);
-            }
-        }
-
-        */
-        ///////////////////////////////////////////////////////////////////////////////////////////////////
 
         private void InitializeComponents()
         {
@@ -274,13 +105,6 @@ namespace MyCalendar
 
             // Lade die Einträge aus der buddy-list.txt
             LoadBuddyList();
-
-            //textRichTextBox = CreateRichTextBox(new Point(10, 10), new Size(550, 120), readOnly: true);
-            //Controls.Add(textRichTextBox);
-
-            //chatRichTextBox = CreateRichTextBox(new Point(10, 150), new Size(550, 100), readOnly: false);
-            //chatRichTextBox.KeyPress += ChatRichTextBox_KeyPress;
-            //Controls.Add(chatRichTextBox);
 
             isOnButton = CreateButton(new Point(400, 320));
             isOnButton.Enabled = false;
@@ -340,27 +164,6 @@ namespace MyCalendar
             }
         }
 
-
-        private RichTextBox CreateRichTextBox(Point location, Size size, bool readOnly)
-        {
-            return new RichTextBox
-            {
-                Location = location,
-                Size = size,
-                ReadOnly = readOnly
-            };
-        }
-
-
-        private ComboBox CreateComboBox(Point location)
-        {
-            return new ComboBox
-            {
-                Location = location,
-                Width = 200,
-                DropDownStyle = ComboBoxStyle.DropDownList // Nur auswählbare Einträge
-            };
-        }
 
       
         private Button CreateButton(Point location)
@@ -438,9 +241,24 @@ namespace MyCalendar
             }
         }
 
+        private void CloseChat(string onionAddress)
+        {
+            if (activeChats.TryGetValue(onionAddress, out var chatData))
+            {
+                var (webSocket, chatForm) = chatData;
+
+                if (webSocket?.State == WebSocketState.Open)
+                {
+                    webSocket.Abort();
+                }
+
+                chatForm.Close(); // Korrektur hier!
+                activeChats.Remove(onionAddress);
+            }
+        }
+
         private async void closeButton_Click(object sender, EventArgs e)
         {
-            isCloseButtonClicked = true;
             Close();
         }
 
@@ -478,14 +296,5 @@ namespace MyCalendar
                 }
             }
         }
-
-
-        //private void OnFormClosing(object sender, FormClosingEventArgs e)
-        //{
-        //    if (!isCloseButtonClicked)
-        //    {
-        //        e.Cancel = true;
-        //    }
-        //}
     }
 }
