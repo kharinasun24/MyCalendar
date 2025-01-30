@@ -1,0 +1,40 @@
+# Tor state file last generated on 2025-01-30 15:20:38 local time
+# Other times below are in UTC
+# You *do not* need to edit this file.
+
+CircuitBuildTimeBin 75 1
+CircuitBuildTimeBin 115 2
+CircuitBuildTimeBin 135 1
+CircuitBuildTimeBin 175 2
+CircuitBuildTimeBin 185 1
+CircuitBuildTimeBin 195 2
+CircuitBuildTimeBin 215 2
+CircuitBuildTimeBin 245 2
+CircuitBuildTimeBin 255 1
+CircuitBuildTimeBin 265 1
+CircuitBuildTimeBin 275 1
+CircuitBuildTimeBin 285 1
+Dormant 0
+Guard in=default rsa_id=015AB136B11A949009A160747296B21B9FA21D69 nickname=Attest sampled_on=2025-01-23T01:22:41 sampled_idx=0 sampled_by=0.4.8.13 listed=1 confirmed_on=2025-01-23T02:28:30 confirmed_idx=1 pb_use_attempts=1.000000 pb_use_successes=1.000000 pb_circ_attempts=5.000000 pb_circ_successes=5.000000 pb_successful_circuits_closed=5.000000
+Guard in=default rsa_id=C43827BB94B59CE61987310F80A035C5AB9DF002 nickname=shellfish01 sampled_on=2025-01-25T06:32:16 sampled_idx=1 sampled_by=0.4.8.13 listed=1 confirmed_on=2025-01-26T07:52:59 confirmed_idx=0 pb_use_attempts=2.000000 pb_use_successes=2.000000 pb_circ_attempts=3.000000 pb_circ_successes=3.000000 pb_successful_circuits_closed=3.000000
+Guard in=default rsa_id=F82126287D1E83F41214090BAD9FF6D6BB0257C6 nickname=Joul sampled_on=2025-01-22T02:23:58 sampled_idx=2 sampled_by=0.4.8.13 listed=1 confirmed_on=2025-01-29T06:11:00 confirmed_idx=2
+Guard in=default rsa_id=DAE65AD32A074CECB30AD3FBB7504F0CDC616CD1 nickname=pablito sampled_on=2025-01-27T01:25:32 sampled_idx=3 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=778DCB9DB6CDD5FF2F1A85571308B492D6DFF962 nickname=TorHet sampled_on=2025-01-24T16:42:41 sampled_idx=4 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=BBEAFF24A9D3406DCC95484DEB3B7DDF98A99980 nickname=Liberation sampled_on=2025-01-27T15:26:19 sampled_idx=5 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=26BB0683618EE0969C2AEB3C1F73C2DC327663BB nickname=Spynode sampled_on=2025-01-24T20:30:07 sampled_idx=6 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=8284C8A45D22F2981C4B6287C7FB4367116E7CCE nickname=Turik sampled_on=2025-01-25T21:49:31 sampled_idx=7 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=4B6A58C6E678F2B0F422D229F20284AB35194223 nickname=Charybdis4 sampled_on=2025-01-20T13:00:35 sampled_idx=8 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=5DC40F5357EDF4809A9010828172072C95A73514 nickname=mylocXdus01 sampled_on=2025-01-23T12:14:10 sampled_idx=9 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=0D5241E79F62BFD507F6CC2E18674B84D089FC53 nickname=prsv sampled_on=2025-01-29T04:32:43 sampled_idx=10 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=4EDE297652CADDCB58C3C41A3B16240F8BFF873B nickname=StarAppsRomero sampled_on=2025-01-30T09:40:32 sampled_idx=11 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=DDDA625FF6C1F1F4554281C2D6DC3FBAD092CB5F nickname=TurtleRelay sampled_on=2025-01-24T04:08:33 sampled_idx=12 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=340704679F46C155094816B34FF6BE491C0AA16E nickname=Zephyrdead sampled_on=2025-01-18T17:25:29 sampled_idx=13 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=CBF59EC5B9FD108092AE9149EFDAE41F882DA669 nickname=Charybdis sampled_on=2025-01-28T04:24:50 sampled_idx=14 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=DF47C5938C23DE8F54DBF3DCE18DAE170AE40EF7 nickname=0x12345 sampled_on=2025-01-18T22:24:45 sampled_idx=15 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=F5FA4A58DAA2339985D96CF55BC8B23207709FA3 nickname=TheCrowd sampled_on=2025-01-22T19:04:59 sampled_idx=16 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=62AFE393020CC3AA3AA30CA78902F5D40E760926 nickname=privator sampled_on=2025-01-22T04:43:50 sampled_idx=17 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=A7C2DF525D373D6A0C4F2540C3927ADF511124CC nickname=editedtheconfig sampled_on=2025-01-20T17:41:17 sampled_idx=18 sampled_by=0.4.8.13 listed=1
+Guard in=default rsa_id=84FA05E6A80EBE36BD84A51705C467FA98188D4A nickname=cozybeardev sampled_on=2025-01-23T03:50:36 sampled_idx=19 sampled_by=0.4.8.13 listed=1
+LastWritten 2025-01-30 14:20:38
+TorVersion Tor 0.4.8.13 (git-e153e72c01315f86)
+TotalBuildTimes 17

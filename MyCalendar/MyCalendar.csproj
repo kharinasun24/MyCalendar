@@ -40,17 +40,29 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 </ItemGroup>
-
-    <ItemGroup>
-    <None Update="tor.exe">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-</ItemGroup>
   
   <ItemGroup>
     <Content Include="tor_hidden_service\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <Content Include="Tor\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\Tor\keys\" />
+    <Folder Include="Data\Tor\onion-auth\" />
+  </ItemGroup>
+
+
 </Project>

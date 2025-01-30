@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace MyCalendar
 {
@@ -9,35 +10,53 @@ namespace MyCalendar
         private const int TorControlPort = 9051;
         private const string HiddenServiceDir = "tor_hidden_service"; // Relativer Pfad
 
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private const int SW_HIDE = 0; // Fenster ausblenden
+        private const int SW_MINIMIZE = 1; // Fenster minimieren
+        private const int SW_SHOWNOACTIVATE = 4; // Fenster anzeigen, aber nicht aktivieren
+
 
         public void StartTorService()
         {
             try
             {
                 // 1. Tor-Prozess starten
+                string torExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tor", "tor.exe");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = "tor.exe", // Pfad zu Ihrer tor.exe-Datei
+                    FileName = torExePath, //  TODO: Pfad zu Ihrer tor.exe-Datei ? 
                                           // Weitere Optionen für tor.exe, z.B. Konfigurationsdatei
                                           // Arguments = "-f torrc.conf",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true
+                    RedirectStandardError = true,
+                    CreateNoWindow = true 
                 };
 
                 using (Process torProcess = new Process { StartInfo = startInfo })
                 {
                     torProcess.Start();
 
+                    /*
+                    // Warten, bis das Fensterhandle verfügbar ist
+                    torProcess.WaitForInputIdle();
+
+                    if (torProcess.MainWindowHandle != IntPtr.Zero)
+                    {
+                        // Fenster in den Hintergrund verschieben (ausblenden oder minimieren)
+                        ShowWindow(torProcess.MainWindowHandle, SW_HIDE);
+                        // Oder:
+                        // ShowWindow(torProcess.MainWindowHandle, SW_MINIMIZE);
+                    }
+                    */
+
                     // Ausgaben von Tor überwachen (optional)
                     torProcess.OutputDataReceived += (sender, e) => Console.WriteLine("Tor Output: " + e.Data);
                     torProcess.ErrorDataReceived += (sender, e) => Console.WriteLine("Tor Error: " + e.Data);
 
-                    // 2. Verzeichnis erstellen und Hidden Service konfigurieren (wie bisher)
-                    Directory.CreateDirectory(HiddenServiceDir);
-                    // ... (Rest Ihres Codes)
-
-                    // 3. Warten, bis der Tor-Prozess beendet ist (optional)
+                    // 2. Warten, bis der Tor-Prozess beendet ist (optional)
                     // torProcess.WaitForExit();
                 }
             }
@@ -45,6 +64,8 @@ namespace MyCalendar
             {
                 Console.WriteLine("Fehler beim Starten von Tor: " + ex.Message);
             }
+
+            SetupHiddenService();
         }
 
 

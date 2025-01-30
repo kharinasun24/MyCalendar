@@ -27,7 +27,6 @@ namespace MyCalendar
 
             TorHiddenService ths = new TorHiddenService();
             ths.StartTorService();
-            ths.SetupHiddenService();
 
         }
 
