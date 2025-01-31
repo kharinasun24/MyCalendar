@@ -30,6 +30,7 @@ namespace MyCalendar
 
         }
 
+        // TODO: Wie kann ich jetzt chatten? Port 5000 wurde geöffnet. Das Programm ist in der Lage einen eingenen HiddenService anzulegen, welcher nun in die GridView unter der eigenen Adresse einzutragen ist.
         private async Task StartChat(string onionAddress)
         {
             if (activeChats.ContainsKey(onionAddress)) return; // Falls bereits verbunden, nichts tun

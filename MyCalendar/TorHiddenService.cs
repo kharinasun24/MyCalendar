@@ -28,7 +28,7 @@ namespace MyCalendar
                 string torExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tor", "tor.exe");
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = torExePath,             //TODO: Testen!
+                    FileName = torExePath,             
                     Arguments = $"-f \"{torrcPath}\"", // Explizit den Pfad zur torrc-Datei setzen
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
@@ -72,6 +72,7 @@ namespace MyCalendar
                     // Tor-Authentifizierung (ohne Passwort)
                     writer.WriteLine("AUTHENTICATE \"\"");
                     string response = reader.ReadLine();
+                    
                     if (!response.Contains("250"))
                     {
                         Console.WriteLine("Tor-Authentifizierung fehlgeschlagen!");
@@ -79,10 +80,12 @@ namespace MyCalendar
                     }
 
                     // 2. Hidden Service erstellen (mit korrektem Pfad)
-                    writer.WriteLine($"ADD_ONION {HiddenServiceDir} Port=80,5000"); // Korrigiert!
+                    writer.WriteLine("ADD_ONION NEW:ED25519-V3 Port=80,127.0.0.1:5000");
                     response = reader.ReadLine();
+                    Console.WriteLine($"Tor Antwort: {response}");
 
-                    if (response.StartsWith("250 OK"))
+
+                    if (response.StartsWith("250-ServiceID="))
                     {
                         Console.WriteLine("Hidden Service erfolgreich gestartet!");
 
