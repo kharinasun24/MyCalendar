@@ -262,19 +262,7 @@ private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWin
             Close();
         }
 
-        //TODO: Das in jede Grid-Line...
-        private void ToggleOnlineStatus(bool status)
-        {
-            if (status)
-            {
-                isOnButton.BackColor = Color.Green;
-            }
-            else
-            {
-
-                isOnButton.BackColor = Color.Red;
-            }
-        }
+         
 
         private async void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
