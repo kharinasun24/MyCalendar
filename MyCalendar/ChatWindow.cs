@@ -50,9 +50,9 @@ namespace MyCalendar //TODO: 1.: me und buddy ersetzen. 2. Layout dieses Windows
             sendButton.Click += SendMessage;
 
             // Alle Steuerelemente zur Form hinzufügen
-            this.Controls.Add(chatBox);
-            this.Controls.Add(inputBox);
-            this.Controls.Add(sendButton);
+            Controls.Add(inputBox);
+            Controls.Add(chatBox);
+            Controls.Add(sendButton);
 
             // Verbindung starten
             _ = StartCommunication();
