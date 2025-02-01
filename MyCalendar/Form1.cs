@@ -124,7 +124,7 @@ namespace MyCalendar
 
             };
 
-            Controls.Add(pickDay);
+            //Controls.Add(pickDay);
 
             Button addButton = new System.Windows.Forms.Button
             {

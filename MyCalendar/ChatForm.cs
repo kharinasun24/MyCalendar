@@ -69,7 +69,6 @@ namespace MyCalendar
 
         /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        //TODO: HIer weiter.
         private async Task StartChat(string onionAddress)
         {
             if (!activeChats.ContainsKey(onionAddress)) return;

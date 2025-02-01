@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace MyCalendar
+namespace MyCalendar //TODO: 1.: me und buddy ersetzen. 2. Layout dieses Windows verbessern.
 {
     public partial class ChatWindow : Form
     {
-        private RichTextBox chatBox;
+        private RichTextBox chatBox;   // Chatverlauf
+        private RichTextBox inputBox;  // Eingabefeld für eigene Nachrichten
+        private Button sendButton;     // Button zum Senden
         private ClientWebSocket webSocket;
         public string OnionAddress { get; }
 
@@ -24,12 +25,34 @@ namespace MyCalendar
             this.Width = 400;
             this.Height = 500;
 
+            // Chat-Anzeige (empfangene Nachrichten)
             chatBox = new RichTextBox
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Top,
+                Height = 300,
                 ReadOnly = true
             };
+
+            // Eingabebox (zum Schreiben eigener Nachrichten)
+            inputBox = new RichTextBox
+            {
+                Dock = DockStyle.Top,
+                Height = 80
+            };
+
+            // Sende-Button
+            sendButton = new Button
+            {
+                Text = "Senden",
+                Dock = DockStyle.Bottom,
+                Height = 40
+            };
+            sendButton.Click += SendMessage;
+
+            // Alle Steuerelemente zur Form hinzufügen
             this.Controls.Add(chatBox);
+            this.Controls.Add(inputBox);
+            this.Controls.Add(sendButton);
 
             // Verbindung starten
             _ = StartCommunication();
@@ -69,13 +92,31 @@ namespace MyCalendar
                     }
 
                     string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    AppendMessage(message);
+                    AppendMessage($"Buddy: {message}");
                 }
             }
             catch (Exception ex)
             {
                 AppendMessage($"Verbindungsfehler: {ex.Message}");
             }
+        }
+
+        private async void SendMessage(object sender, EventArgs e)
+        {
+            if (webSocket == null || webSocket.State != WebSocketState.Open)
+            {
+                AppendMessage("Verbindung nicht aktiv.");
+                return;
+            }
+
+            string message = inputBox.Text.Trim();
+            if (string.IsNullOrEmpty(message)) return;
+
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            await webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+
+            AppendMessage($"me: {message}");
+            inputBox.Clear(); // Eingabefeld leeren
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
