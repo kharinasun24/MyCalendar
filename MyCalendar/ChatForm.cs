@@ -2,13 +2,12 @@
 using System.Net.WebSockets;
 using System.Net;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MyCalendar
 {
     public partial class ChatForm : Form
     {
-        private string meOnionAddress;
+        //private string meOnionAddress;
 
         private DataGridView dataGridView;
         private Button closeButton;
@@ -19,89 +18,110 @@ namespace MyCalendar
         {
             Size = new Size(600, 400);
 
-            meOnionAddress = CreateHiddeService();
-
-            int isHddenService = ValidateHiddeService(meOnionAddress);
-
-            if (isHddenService < 0) { return; }
-
             InitializeComponents();
+
+            CreateHiddeService();
+
+            InitializeWebSockets();
         }
 
-        private int ValidateHiddeService(string meOnionAddress)
-        {
-            if (string.IsNullOrEmpty(meOnionAddress))
-            {
-                MessageBox.Show("ERROR");
-                return -1; // Beendet die Ausführung des Konstruktors
-            }
-            return 0;
-        }
-
-        private string CreateHiddeService() {
+   
+        private void CreateHiddeService() {
 
             TorHiddenService ths = new TorHiddenService();
 
             ths.StartTorService();
 
-            return ths.OnionAddress;
+            string myOnion = ths.OnionAddress;
+
+            // Prüfen, ob Tor gestartet ist und eine .onion-Adresse existiert
+            if (string.IsNullOrEmpty(myOnion))
+            {
+                MessageBox.Show("Fehler: Hidden Service konnte nicht gestartet werden!");
+                return;
+            }
+
+            else
+            {
+                // Falls es geklappt hat, setze mich (erste Zeile) auf Online
+                if (dataGridView.Rows.Count > 0)
+                {
+                    dataGridView.Rows[0].Cells["StatusColumn"].Value = "Online";
+                    dataGridView.Refresh(); // Damit die Farben direkt aktualisiert werden
+                }
+            }
+
 
         }
 
-        // TODO: Wie kann ich jetzt chatten?
-        //1. Schritt: Die Verbindung zu den buddy-Adressen soll nicht hier aufgebaut werden.
+        private void InitializeWebSockets()
+        {
+            foreach (DataGridViewRow row in dataGridView.Rows)
+            {
+                if (row.Cells["AddressColumn"].Value is string onionAddress && !string.IsNullOrEmpty(onionAddress))
+                {
+                    var webSocket = CreateTorWebSocket(); // Erstelle den WebSocket
+                    activeChats[onionAddress] = (webSocket, null); // Noch kein ChatWindow
+                }
+            }
+        }
+
+
+        /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //TODO: HIer weiter.
         private async Task StartChat(string onionAddress)
         {
-            if (activeChats.ContainsKey(onionAddress)) return; // Falls bereits verbunden, nichts tun
+            if (!activeChats.ContainsKey(onionAddress)) return;
 
-            var chatWindow = new ChatWindow(onionAddress);
-            chatWindow.Text = $"Chat mit {onionAddress}";
+            // Falls ChatWindow existiert, einfach anzeigen
+            if (activeChats[onionAddress].Item2 != null)
+            {
+                activeChats[onionAddress].Item2.Show();
+                return;
+            }
+
+            var webSocket = activeChats[onionAddress].Item1;
+            var chatWindow = new ChatWindow(onionAddress, webSocket);
+
+            // Event registrieren, um das Chat-Fenster beim Schließen aus der Liste zu entfernen
+            chatWindow.ChatClosed += (closedOnion) =>
+            {
+                if (activeChats.ContainsKey(closedOnion))
+                {
+                    activeChats.Remove(closedOnion);
+                }
+            };
+
             chatWindow.Show();
-
-            var webSocket = CreateTorWebSocket(); // Tor-WebSocket nutzen
-            Uri serverUri = new Uri($"ws://{onionAddress}");
-
-            try
-            {
-                await webSocket.ConnectAsync(serverUri, CancellationToken.None);
-                chatWindow.AppendMessage("Verbunden mit " + onionAddress);
-
-                // Verbindung in Dictionary speichern
-                activeChats[onionAddress] = (webSocket, chatWindow);
-
-                // Nachrichtenempfang starten
-                _ = Task.Run(() => ReceiveMessages(webSocket, chatWindow));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Fehler beim Verbinden mit {onionAddress}: {ex.Message}");
-                chatWindow.Close();
-            }
+            activeChats[onionAddress] = (webSocket, chatWindow);
         }
 
 
-        
-
-private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWindow)
-{
-    byte[] buffer = new byte[1024];
-
-    try
+        /*
+        private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWindow)
     {
-        while (webSocket.State == WebSocketState.Open)
+        byte[] buffer = new byte[1024];
+
+        try
         {
-            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            while (webSocket.State == WebSocketState.Open)
+            {
+                WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
 
-            // UI-Thread-Aufruf, um die Nachricht im Chat-Fenster anzuzeigen
-            chatWindow.Invoke((MethodInvoker)(() => chatWindow.AppendMessage($"Buddy: {message}")));
+                // UI-Thread-Aufruf, um die Nachricht im Chat-Fenster anzuzeigen
+                chatWindow.Invoke((MethodInvoker)(() => chatWindow.AppendMessage($"Buddy: {message}")));
+            }
+        }
+        catch (Exception ex)
+        {
+            chatWindow.Invoke((MethodInvoker)(() => chatWindow.AppendMessage($"Verbindung getrennt: {ex.Message}")));
         }
     }
-    catch (Exception ex)
-    {
-        chatWindow.Invoke((MethodInvoker)(() => chatWindow.AppendMessage($"Verbindung getrennt: {ex.Message}")));
-    }
-}
+    */
+
+        /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public ClientWebSocket CreateTorWebSocket()
         {
@@ -146,7 +166,7 @@ private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWin
 
             dataGridView.CurrentCellDirtyStateChanged += dataGridView_CurrentCellDirtyStateChanged;
             dataGridView.CellValueChanged += dataGridView_CellValueChanged;
-
+            dataGridView.CellFormatting += DataGridView_CellFormatting;
 
             // Spalten hinzufügen
             var checkColumn = new DataGridViewCheckBoxColumn
@@ -161,6 +181,14 @@ private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWin
                 Name = "NameColumn",
                 Width = 150
             };
+            var statusColumn = new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Status",
+                Name = "StatusColumn",
+                Width = 100,
+                ReadOnly = true // Nutzer kann Status nicht manuell ändern
+            };
+
             var addressColumn = new DataGridViewTextBoxColumn
             {
                 HeaderText = "Onion-Adresse",
@@ -171,19 +199,13 @@ private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWin
             dataGridView.Columns.Add(checkColumn);
             dataGridView.Columns.Add(nameColumn);
             dataGridView.Columns.Add(addressColumn);
+            dataGridView.Columns.Add(statusColumn);
 
             // DataGridView zur Form hinzufügen
             Controls.Add(dataGridView);
         }
 
-        private void dataGridView_CurrentCellDirtyStateChanged(object sender, EventArgs e)
-        {
-            if (dataGridView.CurrentCell is DataGridViewCheckBoxCell)
-            {
-                dataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit); // Änderung sofort übernehmen
-            }
-        }
-
+    
 
       
         private Button CreateButton(Point location)
@@ -211,7 +233,25 @@ private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWin
             return button;
         }
 
- 
+
+     
+
+        private void CloseChat(string onionAddress)
+        {
+            if (activeChats.TryGetValue(onionAddress, out var chatData))
+            {
+                var (webSocket, chatForm) = chatData;
+
+                if (webSocket?.State == WebSocketState.Open)
+                {
+                    webSocket.Abort();
+                }
+
+                chatForm.Close(); // Korrektur hier!
+                activeChats.Remove(onionAddress);
+            }
+        }
+
         private void LoadBuddyList()
         {
             try
@@ -261,28 +301,34 @@ private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWin
             }
         }
 
-        private void CloseChat(string onionAddress)
+
+        private void dataGridView_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
-            if (activeChats.TryGetValue(onionAddress, out var chatData))
+            if (dataGridView.CurrentCell is DataGridViewCheckBoxCell)
             {
-                var (webSocket, chatForm) = chatData;
-
-                if (webSocket?.State == WebSocketState.Open)
-                {
-                    webSocket.Abort();
-                }
-
-                chatForm.Close(); // Korrektur hier!
-                activeChats.Remove(onionAddress);
+                dataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit); // Änderung sofort übernehmen
             }
         }
 
-        private async void closeButton_Click(object sender, EventArgs e)
+
+
+        private void DataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            Close();
+            if (dataGridView.Columns[e.ColumnIndex].Name == "StatusColumn" && e.Value is string status)
+            {
+                if (status == "Online")
+                {
+                    e.CellStyle.BackColor = Color.Green;
+                    e.CellStyle.ForeColor = Color.White;
+                }
+                else
+                {
+                    e.CellStyle.BackColor = Color.Red;
+                    e.CellStyle.ForeColor = Color.White;
+                }
+            }
         }
 
-         
 
         private async void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
@@ -303,6 +349,11 @@ private async Task ReceiveMessages(ClientWebSocket webSocket, ChatWindow chatWin
                     CloseChat(buddyOnion); // Chat schließen
                 }
             }
+        }
+
+        private async void closeButton_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
