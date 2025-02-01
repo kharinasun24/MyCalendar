@@ -6,6 +6,9 @@ namespace MyCalendar
 {
     public class TorHiddenService
     {
+
+        public string OnionAddress { get; private set; }
+
         private const string TorControlHost = "127.0.0.1";
         private const int TorControlPort = 9051;
 
@@ -91,7 +94,26 @@ namespace MyCalendar
 
                         // 3. Onion-Adresse auslesen
                         string onionAddress = File.ReadAllText(Path.Combine(HiddenServiceDir, "hostname")).Trim();
+
+                        OnionAddress = onionAddress;
+
                         Console.WriteLine($"Deine .onion-Adresse: {onionAddress}");
+
+                        // Pfad zur Buddy-Liste
+                        string filePath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"buddy-list.txt"));
+
+                        // Überprüfen, ob die Datei leer ist oder nicht existiert
+                        if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
+                        {
+                            // Eintrag hinzufügen
+                            using (StreamWriter buddylistWriter = new StreamWriter(filePath))
+                            {
+                                buddylistWriter.WriteLine($"{onionAddress} me");
+                            }
+                            Console.WriteLine("Eintrag zur Buddy-Liste hinzugefügt.");
+                        }
+
+
                     }
                     else
                     {

@@ -8,6 +8,8 @@ namespace MyCalendar
 {
     public partial class ChatForm : Form
     {
+        private string meOnionAddress;
+
         private DataGridView dataGridView;
         private Button closeButton;
         private Button isOnButton;
@@ -16,21 +18,38 @@ namespace MyCalendar
         public ChatForm()
         {
             Size = new Size(600, 400);
-            
-            CreateHiddeService();
-            
+
+            meOnionAddress = CreateHiddeService();
+
+            int isHddenService = ValidateHiddeService(meOnionAddress);
+
+            if (isHddenService < 0) { return; }
+
             InitializeComponents();
         }
 
+        private int ValidateHiddeService(string meOnionAddress)
+        {
+            if (string.IsNullOrEmpty(meOnionAddress))
+            {
+                MessageBox.Show("ERROR");
+                return -1; // Beendet die Ausführung des Konstruktors
+            }
+            return 0;
+        }
 
-        private void CreateHiddeService() {
+        private string CreateHiddeService() {
 
             TorHiddenService ths = new TorHiddenService();
+
             ths.StartTorService();
+
+            return ths.OnionAddress;
 
         }
 
-        // TODO: Wie kann ich jetzt chatten? Port 5000 wurde geöffnet. Das Programm ist in der Lage einen eingenen HiddenService anzulegen, welcher nun in die GridView unter der eigenen Adresse einzutragen ist.
+        // TODO: Wie kann ich jetzt chatten?
+        //1. Schritt: Die Verbindung zu den buddy-Adressen soll nicht hier aufgebaut werden.
         private async Task StartChat(string onionAddress)
         {
             if (activeChats.ContainsKey(onionAddress)) return; // Falls bereits verbunden, nichts tun

@@ -267,6 +267,9 @@
   <data name="temperature" xml:space="preserve">
     <value>hômérséklet</value>
   </data>
+  <data name="The Chat Form has already been opened." xml:space="preserve">
+    <value>A csevegő űrlap már megnyílt.</value>
+  </data>
   <data name="today" xml:space="preserve">
     <value>ma</value>
   </data>

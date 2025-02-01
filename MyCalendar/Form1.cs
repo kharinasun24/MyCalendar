@@ -13,6 +13,7 @@ namespace MyCalendar
 
         ResourceManager resourceManager;
 
+
         public MonthCalendar monthCalendar;
 
         private DateDao dateDao;
@@ -32,6 +33,8 @@ namespace MyCalendar
         private Label pickClock;
         private TextBox location;
         private ComboBox languageComboBox;
+
+        private static bool isOpen = false;
 
         private List<PublicHoliday> holidays;
 
@@ -659,9 +662,18 @@ namespace MyCalendar
         private void ctButton_Click(object sender, EventArgs e)
         {
 
+            if (isOpen)
+            {
+                MessageBox.Show(resourceManager.GetString("The Chat Form has already been opened."));
+                return;
+            }
+
             ChatForm ctForm = new ChatForm();
-            //ctForm.ShowDialog();
+            isOpen = true;
+            ctForm.FormClosed += (s, args) => isOpen = false;
             ctForm.Show();
+
+
 
 
         }

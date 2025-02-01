@@ -267,6 +267,9 @@
   <data name="temperature" xml:space="preserve">
     <value>Temperatur</value>
   </data>
+  <data name="The Chat Form has already been opened." xml:space="preserve">
+    <value>Die ChatForm ist bereits geöffnet.</value>
+  </data>
   <data name="today" xml:space="preserve">
     <value>heute</value>
   </data>
