@@ -20,13 +20,15 @@ namespace MyCalendar
 
             InitializeComponents();
 
-            CreateHiddeService();
+            CreateHiddenService();
 
             InitializeWebSockets();
+
+            Task.Run(CheckBuddyStatusAsync);  
         }
 
    
-        private void CreateHiddeService() {
+        private void CreateHiddenService() {
 
             TorHiddenService ths = new TorHiddenService();
 
@@ -354,5 +356,49 @@ namespace MyCalendar
         {
             Close();
         }
+
+        private async Task CheckBuddyStatusAsync()
+        {
+            while (true) // Dauerschleife für wiederholte Überprüfung
+            {
+                for (int i = 1; i < dataGridView.Rows.Count; i++) // Start bei 1, um die erste Zeile zu überspringen
+                {
+                    DataGridViewRow row = dataGridView.Rows[i];
+                    if (row.Cells["AddressColumn"].Value is string onionAddress && !string.IsNullOrEmpty(onionAddress))
+                    {
+                        bool isOnline = await IsBuddyOnline(onionAddress);
+
+                        row.Cells["StatusColumn"].Value = isOnline ? "Online" : "Offline";
+
+                        // Farbe entsprechend anpassen
+                        row.Cells["StatusColumn"].Style.BackColor = isOnline ? Color.Green : Color.Red;
+                        row.Cells["StatusColumn"].Style.ForeColor = Color.White;
+                    }
+                }
+
+                await Task.Delay(10000); // 10 Sekunden warten, bevor erneut geprüft wird
+            }
+        }
+
+        private async Task<bool> IsBuddyOnline(string onionAddress)
+        {
+            try
+            {
+                using (var webSocket = new ClientWebSocket())
+                {
+                    webSocket.Options.Proxy = new WebProxy("socks5://127.0.0.1:9050");
+
+                    var uri = new Uri($"ws://{onionAddress}:80"); // WebSocket-Verbindung zur Onion-Adresse
+                    await webSocket.ConnectAsync(uri, CancellationToken.None);
+
+                    return webSocket.State == WebSocketState.Open;
+                }
+            }
+            catch
+            {
+                return false; // Verbindung fehlgeschlagen, also offline
+            }
+        }
+
     }
 }

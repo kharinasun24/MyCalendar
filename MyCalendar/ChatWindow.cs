@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace MyCalendar //TODO: 1.: me und buddy ersetzen. 2. Layout dieses Windows verbessern.
+namespace MyCalendar 
 {
     public partial class ChatWindow : Form
     {
