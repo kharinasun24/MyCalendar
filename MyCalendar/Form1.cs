@@ -196,8 +196,7 @@ namespace MyCalendar
 
 
             languageComboBox.SelectedIndex = index;
-            //languageComboBox.Location = new Point(120, 335);
-
+        
             // Handle selection change
             languageComboBox.SelectedIndexChanged += (sender, e) =>
             {
@@ -210,8 +209,6 @@ namespace MyCalendar
                 Environment.Exit(0);
 
             };
-
-            //Controls.Add(languageComboBox);
 
             FlowLayoutPanel flowLayoutPanel2 = new FlowLayoutPanel
             {
@@ -230,8 +227,6 @@ namespace MyCalendar
 
             deleteAllContactsButton.Click += DeleteAllContactsButton_Click;
 
-            //Controls.Add(deleteAllContactsButton);
-
             Button deleteAllDatesButton = new System.Windows.Forms.Button
             {
                 Text = "delete all dates",
@@ -240,8 +235,6 @@ namespace MyCalendar
             };
 
             deleteAllDatesButton.Click += DeleteAllDatesButton_Click;
-
-            //Controls.Add(deleteAllDatesButton);
 
             flowLayoutPanel2.Controls.Add(deleteAllContactsButton);
 
@@ -258,27 +251,11 @@ namespace MyCalendar
                 AutoSize = true
             };
 
-            // Erstelle den Button "showWeatherButton"
-            showWeatherButton = new Button
-            {
-                Text = "  🌦  ",
-                AutoSize = true
-            };
-            //showWeatherButton.Click += ShowWeatherButton_Click;
-
-
-            //flowLayoutPanel.Controls.Add(showWeatherButton);
-
             // Erstelle das Textfeld "location"
             location = new TextBox
             {
                 AutoSize = true
             };
-
-            //location.KeyDown += new KeyEventHandler(ShowWeatherLocation_KeyDown);
-
-
-            //flowLayoutPanel.Controls.Add(location);
 
             flowLayoutPanel.Controls.Add(languageComboBox);
 
@@ -300,10 +277,6 @@ namespace MyCalendar
 
 
         }
-
-
-
-
 
         private async Task CreateCalendar(int year, int month, int day)
         {
@@ -358,8 +331,6 @@ namespace MyCalendar
                     };
 
 
-
-                    //if (appointmentsToIDsDict.Values.Contains(givenDate)) 
                     if (appointmentsToIDsDict.Any(kvp => kvp.Value == givenDate))
                     {
 
@@ -673,9 +644,6 @@ namespace MyCalendar
             ctForm.FormClosed += (s, args) => isOpen = false;
             ctForm.Show();
 
-
-
-
         }
 
 
@@ -854,43 +822,6 @@ namespace MyCalendar
             }
         }
 
-        /*
-
-        private void ShowWeatherLocation_KeyDown(object sender, KeyEventArgs e)
-        {
-            // Prüfen, ob die Enter-Taste gedrückt wurde
-            if (e.KeyCode == Keys.Enter)
-            {
-                HandleWeather();
-
-                e.SuppressKeyPress = true; // Verhindert, dass das Drücken der Enter-Taste einen Ton verursacht
-            }
-        }
-        private void ShowWeatherButton_Click(object? sender, EventArgs e)
-        {
-            HandleWeather();
-        }
-
-        private void HandleWeather()
-        {
-            string loc = location.Text;
-
-            if (!string.IsNullOrEmpty(loc))
-            {
-
-                WeatherForm weatherForm = new WeatherForm(loc);
-                weatherForm.ShowDialog();
-
-            }
-            else
-            {
-
-                MessageBox.Show(resourceManager.GetString("Enter a town to look up its weather data!"));
-
-            }
-        }
-
-        */
 
         private void Placeholder_Click(object? sender, EventArgs e)
         {
@@ -983,8 +914,6 @@ namespace MyCalendar
 
         }
 
-
-
         private void DataGridViewAppointmentsOnClickedDay_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             // Überprüfen, ob es sich um die Spalten "start" oder "end" handelt
@@ -1005,8 +934,5 @@ namespace MyCalendar
                 }
             }
         }
-
-
-
     }
 }
