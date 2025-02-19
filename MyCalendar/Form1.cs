@@ -288,6 +288,8 @@ namespace MyCalendar
 
             DateTime firstDayOfMonth = new DateTime(year, month, 1);
             int daysInMonth = DateTime.DaysInMonth(year, month);
+            
+            //Wähle bewusst Sonntag als ersten tag, kann hier geändert werden.
             int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
 
             DateTime givenDate;
