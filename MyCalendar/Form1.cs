@@ -315,7 +315,10 @@ namespace MyCalendar
 
             DateTime firstDayOfMonth = new DateTime(year, month, 1);
             int daysInMonth = DateTime.DaysInMonth(year, month);
-            int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+
+
+            int startDayOfWeek = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
+
 
             DateTime givenDate;
             // Labels für die Tage des Monats erstellen mit
