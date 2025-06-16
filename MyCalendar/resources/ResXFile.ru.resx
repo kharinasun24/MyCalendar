@@ -288,6 +288,12 @@
   <data name="whole day" xml:space="preserve">
     <value>весь день</value>
   </data>
+  <data name="Exp Xml" xml:space="preserve">
+    <value>Xml экспорт</value>
+  </data>
+  <data name="Exp Vcf" xml:space="preserve">
+    <value>Vcf экспорт</value>
+  </data>
   <data name="winddirection" xml:space="preserve">
     <value>направление ветра</value>
   </data>

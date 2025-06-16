@@ -258,6 +258,12 @@
   <data name="Start" xml:space="preserve">
     <value>Start</value>
   </data>
+    <data name="Exp Xml" xml:space="preserve">
+    <value>Exp Xml</value>
+  </data>
+  <data name="Exp Vcf" xml:space="preserve">
+    <value>Exp Vcf</value>
+  </data>
   <data name="surname" xml:space="preserve">
     <value>Nachname</value>
   </data>

@@ -10,7 +10,7 @@ namespace MyCalendar
 
         ResourceManager resourceManager;
 
-        private Button exportButton; private Button importButton;
+        private Button exportButton; private Button exportVcsButton; private Button importButton;
         private Button closeButton;
 
         private ContactDao contactDao;
@@ -67,7 +67,7 @@ namespace MyCalendar
 
             exportButton = new Button
             {
-                Text = resourceManager.GetString("export"),
+                Text = resourceManager.GetString("Exp Xml"),
                 Location = new Point(110, 300),
                 AutoSize = true,
                 BackColor = Color.LightGray,
@@ -79,10 +79,25 @@ namespace MyCalendar
 
             Controls.Add(exportButton);
 
+            exportVcsButton = new Button
+            {
+                Text = resourceManager.GetString("Exp Vcf"),
+                Location = new Point(210, 300),
+                AutoSize = true,
+                BackColor = Color.LightGray,
+                Size = new Size(100, 50)
+            };
+
+            exportVcsButton.Click += ExportVcsButton_Click;
+
+            Controls.Add(exportVcsButton);
+
+            //TODO: import des vcs-Format implementieren - statt schließen soll hier der import stattfinden.
+
             closeButton = new Button
             {
                 Text = resourceManager.GetString("Close"),
-                Location = new Point(210, 300),
+                Location = new Point(410, 300),
                 AutoSize = true,
                 BackColor = Color.LightGray,
                 Size = new Size(100, 50)
@@ -99,7 +114,7 @@ namespace MyCalendar
 
             importButton = new Button
             {
-                Text = resourceManager.GetString("import"),
+                Text = "Import Xml",
                 Location = new Point(310, 300),
                 AutoSize = true,
                 BackColor = Color.LightGray,
@@ -113,6 +128,46 @@ namespace MyCalendar
 
             DrawContacts();
 
+        }
+
+        private void ExportVcsButton_Click(object sender, EventArgs e)
+        {
+            List<Contact> contacts = contactDao.GetAllContacts();
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "vCard files (*.vcf)|*.vcf|All files (*.*)|*.*";
+            saveFileDialog.Title = "Save Contacts as vCard (.vcf)";
+            saveFileDialog.ShowDialog();
+
+            if (!string.IsNullOrWhiteSpace(saveFileDialog.FileName))
+            {
+                using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName, false))
+                {
+                    foreach (Contact c in contacts)
+                    {
+                        writer.WriteLine("BEGIN:VCARD");
+                        writer.WriteLine("VERSION:3.0");
+                        writer.WriteLine($"FN:{c.NameGiven} {c.Name}");
+                        writer.WriteLine($"N:{c.Name};{c.NameGiven};;;");
+
+                        if (!string.IsNullOrEmpty(c.Phone))
+                            writer.WriteLine($"TEL;TYPE=CELL,PREF:{c.Phone}");
+
+                        if (!string.IsNullOrEmpty(c.Email))
+                            writer.WriteLine($"EMAIL;TYPE=HOME,PREF:{c.Email}");
+
+                        if (!string.IsNullOrEmpty(c.Address))
+                            writer.WriteLine($"ADR;TYPE=HOME:;;{c.Address};;;;");
+
+                        if (!string.IsNullOrEmpty(c.Notes))
+                            writer.WriteLine($"NOTE:{c.Notes}");
+
+                        writer.WriteLine("END:VCARD");
+                    }
+                }
+
+                MessageBox.Show("Contacts exported as vCard successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void FilterTextButton_Click(object? sender, EventArgs e)
@@ -319,7 +374,6 @@ namespace MyCalendar
 
                         DrawContacts();
                     }
-
 
                 }
 

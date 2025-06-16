@@ -219,6 +219,12 @@
   <data name="minimal" xml:space="preserve">
     <value>minimal</value>
   </data>
+  <data name="Exp Xml" xml:space="preserve">
+    <value>Exp Xml</value>
+  </data>
+  <data name="Exp Vcf" xml:space="preserve">
+    <value>Exp Vcf</value>
+  </data>
   <data name="monthly" xml:space="preserve">
     <value>monthly</value>
   </data>

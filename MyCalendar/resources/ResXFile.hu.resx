@@ -222,6 +222,12 @@
   <data name="monthly" xml:space="preserve">
     <value>havonta</value>
   </data>
+  <data name="Exp Xml" xml:space="preserve">
+    <value>Exp Xml</value>
+  </data>
+  <data name="Exp Vcf" xml:space="preserve">
+    <value>Exp Vcf</value>
+  </data>
   <data name="Multi-day appointments must not exceed the monthly limit." xml:space="preserve">
     <value>Többnapos időpontok nem haladhatják meg a havi keretet.</value>
   </data>
