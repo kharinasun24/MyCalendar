@@ -20,7 +20,6 @@ namespace MyCalendar
             contactDao = new ContactDao();
         }
 
-        //TODO: Datensätze werden erst nach erneutem Öffnen des Fensters angezeigt...
         public void ReadVcf()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -107,7 +106,7 @@ namespace MyCalendar
             }
         }
 
-        //TODO: Datensätze werden erst nach erneutem Öffnen des Fensters angezeigt...s
+        
         public void ReadXML()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();

@@ -181,6 +181,8 @@ namespace MyCalendar
             Reader reader = new Reader();
 
             reader.ReadXML();
+
+            DrawContacts();
         }
 
         private void ExportButton_Click(object sender, EventArgs e)
@@ -405,6 +407,8 @@ namespace MyCalendar
             Reader reader = new Reader();
 
             reader.ReadVcf();
+
+            DrawContacts();
         }
 
         private void AddContactButton_Click(object sender, EventArgs e)
