@@ -294,6 +294,9 @@
   <data name="Exp Vcf" xml:space="preserve">
     <value>Vcf экспорт</value>
   </data>
+  <data name="Imp Vcf" xml:space="preserve">
+    <value>Vcf импорт</value>
+  </data>
   <data name="winddirection" xml:space="preserve">
     <value>направление ветра</value>
   </data>

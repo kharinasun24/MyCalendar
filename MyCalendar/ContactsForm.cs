@@ -11,7 +11,7 @@ namespace MyCalendar
         ResourceManager resourceManager;
 
         private Button exportButton; private Button exportVcsButton; private Button importButton;
-        private Button closeButton;
+        private Button importVcsButton;
 
         private ContactDao contactDao;
         private LanguageDao languageDao;
@@ -92,11 +92,9 @@ namespace MyCalendar
 
             Controls.Add(exportVcsButton);
 
-            //TODO: import des vcs-Format implementieren - statt schließen soll hier der import stattfinden.
-
-            closeButton = new Button
+            importVcsButton = new Button
             {
-                Text = resourceManager.GetString("Close"),
+                Text = resourceManager.GetString("Imp Vcf"),
                 Location = new Point(410, 300),
                 AutoSize = true,
                 BackColor = Color.LightGray,
@@ -104,13 +102,13 @@ namespace MyCalendar
             };
 
 
-            closeButton.Click += SaveButton_Click;
+            importVcsButton.Click += importButtonVcf_Click;
 
-            closeButton.MouseEnter += cancelButton_MouseEnter;
+            importVcsButton.MouseEnter += cancelButton_MouseEnter;
 
-            closeButton.MouseLeave += cancelButton_MouseLeave;
+            importVcsButton.MouseLeave += cancelButton_MouseLeave;
 
-            Controls.Add(closeButton);
+            Controls.Add(importVcsButton);
 
             importButton = new Button
             {
@@ -402,9 +400,11 @@ namespace MyCalendar
         }
 
 
-        private void SaveButton_Click(object sender, EventArgs e)
+        private void importButtonVcf_Click(object sender, EventArgs e)
         {
-            Close();
+            Reader reader = new Reader();
+
+            reader.ReadVcf();
         }
 
         private void AddContactButton_Click(object sender, EventArgs e)
@@ -419,16 +419,16 @@ namespace MyCalendar
         private void cancelButton_MouseEnter(object sender, EventArgs e)
         {
             //Bein ersten Mal mit der Maus drüber wird das Ding blau eingefärbt.
-            closeButton.BackColor = Color.LightBlue;
-            closeButton.Cursor = Cursors.Hand;
+            importVcsButton.BackColor = Color.LightBlue;
+            importVcsButton.Cursor = Cursors.Hand;
         }
 
 
         private void cancelButton_MouseLeave(object sender, EventArgs e)
         {
             //Bein ersten Mal mit der Maus drüber wird das Ding blau eingefärbt.
-            closeButton.BackColor = Color.LightGray;
-            closeButton.Cursor = Cursors.Hand;
+            importVcsButton.BackColor = Color.LightGray;
+            importVcsButton.Cursor = Cursors.Hand;
         }
 
 

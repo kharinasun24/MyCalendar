@@ -20,6 +20,94 @@ namespace MyCalendar
             contactDao = new ContactDao();
         }
 
+        //TODO: Datensätze werden erst nach erneutem Öffnen des Fensters angezeigt...
+        public void ReadVcf()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "VCF files (*.vcf)|*.vcf|All files (*.*)|*.*";
+            openFileDialog.Title = "Open VCF File";
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string selectedFilePath = openFileDialog.FileName;
+
+                try
+                {
+                    string[] lines = File.ReadAllLines(selectedFilePath);
+                    string name = "", nameGiven = "", phone = "", email = "", address = "", addressstreet = "", birthday = "", notes = "";
+
+                    foreach (string line in lines)
+                    {
+                        if (line.StartsWith("BEGIN:VCARD"))
+                        {
+                            // reset values for new contact
+                            name = nameGiven = phone = email = address = addressstreet = birthday = notes = "";
+                        }
+                        else if (line.StartsWith("N:"))
+                        {
+                            // Format: N:Last;First;;;
+                            var parts = line.Substring(2).Split(';');
+                            if (parts.Length > 1)
+                            {
+                                name = parts[0];
+                                nameGiven = parts[1];
+                            }
+                        }
+                        else if (line.StartsWith("FN:"))
+                        {
+                            // Full name – optional
+                        }
+                        else if (line.StartsWith("TEL"))
+                        {
+                            int index = line.IndexOf(':');
+                            if (index != -1)
+                                phone = line.Substring(index + 1);
+                        }
+                        else if (line.StartsWith("EMAIL"))
+                        {
+                            int index = line.IndexOf(':');
+                            if (index != -1)
+                                email = line.Substring(index + 1);
+                        }
+                        else if (line.StartsWith("ADR"))
+                        {
+                            // Format: ADR;TYPE=HOME:;;street;city;state;zip;country
+                            int index = line.IndexOf(':');
+                            if (index != -1)
+                            {
+                                var adrParts = line.Substring(index + 1).Split(';');
+                                if (adrParts.Length > 2)
+                                {
+                                    addressstreet = adrParts[2]; // Straße
+                                }
+                                if (adrParts.Length > 3)
+                                {
+                                    address = adrParts[3]; // Ort (z. B. Stadt mit PLZ)
+                                }
+                            }
+                        }
+                        else if (line.StartsWith("BDAY:"))
+                        {
+                            birthday = line.Substring(5); // falls vCard Geburtstag enthält
+                        }
+                        else if (line.StartsWith("NOTE:"))
+                        {
+                            notes = line.Substring(5);
+                        }
+                        else if (line.StartsWith("END:VCARD"))
+                        {
+                            contactDao.CreateNewContact(name, nameGiven, phone, email, birthday, notes, address, addressstreet);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Fehler beim Einlesen der VCF-Datei: " + ex.Message);
+                }
+            }
+        }
+
+        //TODO: Datensätze werden erst nach erneutem Öffnen des Fensters angezeigt...s
         public void ReadXML()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -195,5 +283,7 @@ namespace MyCalendar
                 }
             }
         }
+
+        
     }
 }
