@@ -126,11 +126,11 @@ namespace MyCalendar
             {
                 connection.Open();
 
-                //TODO: 
-                string sql = $"SELECT * FROM dates WHERE (repeat = 'm' AND (SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonth}) OR SUBSTR(start, -4) > {formattedYear} OR SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonthPreceding}) OR SUBSTR(start, -4) > {formattedYear})) OR (repeat = 'n' AND (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%')) OR (repeat = 'y' AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'))";
+                //TODO: Test this FIRST!...  
+                string sql = $@"SELECT * FROM dates WHERE (repeat = 'm' AND (CAST(SUBSTR(start, 7, 4) AS INT) < {formattedYear} OR (CAST(SUBSTR(start, 7, 4) AS INT) = {formattedYear} AND CAST(SUBSTR(start, 4, 2) AS INT) <= {formattedMonth}))) OR (repeat = 'n' AND ((start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%') OR (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%'))) OR (repeat = 'y' AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'));";
 
-                //TODO: If n, it may exceed the monthly limit.
-                //string sql = $"SELECT * FROM dates WHERE (repeat = 'm' AND (SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonth}) OR SUBSTR(start, -4) > {formattedYear} OR SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonthPreceding}) OR SUBSTR(start, -4) > {formattedYear})) OR ((repeat = 'n' AND (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%')) OR (end LIKE '%.{formattedYear}%' AND end LIKE '%.{formattedMonth}.%' OR end > '{formattedYear}-{formattedMonth}-31')) OR (repeat = 'y' AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'))";
+                //TODO: If n, it may exceed the monthly limit, this will be the next goal:
+                //string sql = like above with OR ((repeat = 'n' AND (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%')) OR (end LIKE '%.{formattedYear}%' AND end LIKE '%.{formattedMonth}.%' OR end > '{formattedYear}-{formattedMonth}-31')) 
 
 
                 using (SQLiteCommand command = new SQLiteCommand(sql, connection))
