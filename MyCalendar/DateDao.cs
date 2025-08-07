@@ -126,8 +126,11 @@ namespace MyCalendar
             {
                 connection.Open();
 
+                //TODO: 
                 string sql = $"SELECT * FROM dates WHERE (repeat = 'm' AND (SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonth}) OR SUBSTR(start, -4) > {formattedYear} OR SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonthPreceding}) OR SUBSTR(start, -4) > {formattedYear})) OR (repeat = 'n' AND (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%')) OR (repeat = 'y' AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'))";
-                //string sql = $"SELECT * FROM dates WHERE (repeat = 'm' AND SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonth}) OR SUBSTR(start, -4) > {formattedYear}) OR (repeat = 'n' AND start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%') OR (repeat = 'y' AND start LIKE '%.{formattedMonth}.%')";
+
+                //TODO: If n, it may exceed the monthly limit.
+                //string sql = $"SELECT * FROM dates WHERE (repeat = 'm' AND (SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonth}) OR SUBSTR(start, -4) > {formattedYear} OR SUBSTR(start, -4) >= {formattedYear} AND (SUBSTR(start, -4) = {formattedYear} AND SUBSTR(start, 7, 2) >= {formattedMonthPreceding}) OR SUBSTR(start, -4) > {formattedYear})) OR ((repeat = 'n' AND (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%')) OR (end LIKE '%.{formattedYear}%' AND end LIKE '%.{formattedMonth}.%' OR end > '{formattedYear}-{formattedMonth}-31')) OR (repeat = 'y' AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'))";
 
 
                 using (SQLiteCommand command = new SQLiteCommand(sql, connection))

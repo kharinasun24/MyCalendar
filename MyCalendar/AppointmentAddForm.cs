@@ -248,75 +248,72 @@ namespace MyCalendar
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
+            DateTime startDate = dateTimePickerStart.Value;
+            DateTime endDate = dateTimePickerEnd.Value;
 
+            int duration = (endDate.Date - startDate.Date).Days + 1;
 
-
-            TimeSpan d = dateTimePickerEnd.Value - dateTimePickerStart.Value;
-            int duration = d.Days;
-
-            duration++;
-
-            if (duration >= 1)
+            if (duration < 1)
             {
-
-                string start = dateTimePickerStart.Value.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
-                string end = dateTimePickerEnd.Value.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
-
-                DateTime startDate = DateTime.ParseExact(start, "dd.MM.yyyy HH:mm", null);
-                DateTime endDate = DateTime.ParseExact(end, "dd.MM.yyyy HH:mm", null);
-
-                if (startDate.Month != endDate.Month || startDate.Year != endDate.Year)
-                {
-
-                    MessageBox.Show(resourceManager.GetString("Multi-day appointments must not exceed the monthly limit."));
-
-                    return;
-                }
-
-                string repeat = "n";
-
-                if (checkBoxMonthly.Checked)
-                {
-                    repeat = "m";
-                }
-                else if (checkBoxYearly.Checked)
-                {
-
-                    repeat = "y";
-                }
-                else if (checkBoxWeekly.Checked)
-                {
-                    repeat = "w";
-                }
-
-                if (!"w".Equals(repeat))
-                {
-
-                    dateDao.saveDate(textBox1.Text, start, end, duration.ToString(), repeat);
-                }
-                else
-                {
-                    repeat = "n";
-
-
-                    List<(DateTime Start, DateTime End)> appointments = GetWeeklyAppointments(startDate, endDate);
-
-                    foreach (var appointment in appointments)
-                    {
-                        dateDao.saveDate(textBox1.Text, appointment.Start.ToString("dd.MM.yyyy HH:mm"), appointment.End.ToString("dd.MM.yyyy HH:mm"), duration.ToString(), repeat);
-                    }
-
-                }
-
-
-
-                form1.DrawAppointmentsOnClickedDay(dy, m, y, dateDao);
-
-                Close();
+                //TODO: I18n.
+                MessageBox.Show("Enddatum muss nach dem Startdatum liegen.");
+                return;
             }
 
+            string repeat = GetRepeatType();
+            string text = textBox1.Text;
 
+            if (startDate.Month != endDate.Month || startDate.Year != endDate.Year)
+            {
+                MessageBox.Show(resourceManager.GetString("Multi-day appointments must not exceed the monthly limit."));
+                return;
+            }
+
+            //TODO: If n, it may exceed the monthly limit.
+            /*
+            if (repeat != "n" && (startDate.Month != endDate.Month || startDate.Year != endDate.Year))
+            {
+                MessageBox.Show(resourceManager.GetString("Multi-day appointments must not exceed the monthly limit."));
+                return;
+            }
+            */
+
+            if (repeat != "w")
+            {
+                SaveDate(text, startDate, endDate, duration, repeat);
+            }
+            else
+            {
+                List<(DateTime Start, DateTime End)> appointments = GetWeeklyAppointments(startDate, endDate);
+                foreach (var appointment in appointments)
+                {
+                    SaveDate(text, appointment.Start, appointment.End, duration, "n");
+                }
+            }
+
+            form1.DrawAppointmentsOnClickedDay(dy, m, y, dateDao);
+            Close();
         }
+
+        private void SaveDate(string text, DateTime start, DateTime end, int duration, string repeat)
+        {
+            dateDao.saveDate(
+                text,
+                start.ToString("dd.MM.yyyy HH:mm"),
+                end.ToString("dd.MM.yyyy HH:mm"),
+                duration.ToString(),
+                repeat
+            );
+        }
+
+        private string GetRepeatType()
+        {
+            if (checkBoxMonthly.Checked) return "m";
+            if (checkBoxYearly.Checked) return "y";
+            if (checkBoxWeekly.Checked) return "w";
+            return "n";
+        }
+
 
         private List<(DateTime Start, DateTime End)> GetWeeklyAppointments(DateTime startDate, DateTime endDate)
         {
