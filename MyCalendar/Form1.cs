@@ -288,9 +288,12 @@ namespace MyCalendar
 
             DateTime firstDayOfMonth = new DateTime(year, month, 1);
             int daysInMonth = DateTime.DaysInMonth(year, month);
-            
+
             //Wähle bewusst Sonntag als ersten tag, kann hier geändert werden.
-            int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+            //int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+
+            //...Montag als ersten Tag:
+            int startDayOfWeek = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
 
             DateTime givenDate;
             // Labels für die Tage des Monats erstellen mit
