@@ -335,10 +335,7 @@ namespace MyCalendar
 
                     if (appointmentsToIDsDict.Any(kvp => kvp.Value == givenDate))
                     {
-
                         appointments = dateDao.GetDatesFor(day, month, year);
-
-
 
                         int selectedMonth = monthCalendar.SelectionStart.Month;
                         int selectedYear = monthCalendar.SelectionStart.Year;
@@ -348,51 +345,41 @@ namespace MyCalendar
                         boldedOrHoliDayToolTip.IsBalloon = true;
                         boldedOrHoliDayToolTip.ShowAlways = true;
 
-                        var od = appointments.Rows;
                         foreach (DataRow row in appointments.Rows)
                         {
                             DateTime dateStart = DateTime.ParseExact(row.Field<string>("start").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-                            DateTime dateToolTip = DateTime.ParseExact(givenDate.ToString().Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
                             DateTime dateEnd = DateTime.ParseExact(row.Field<string>("end").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                            DateTime dateToolTip = givenDate.Date;
 
+                            // Adjusted Dates bauen (Jahr, Monat, Tag, Zeit)
+                            DateTime adjustedDateStart = new DateTime(selectedYear, selectedMonth, dateStart.Day, 0, 0, 0);
+                            DateTime adjustedDateEnd = new DateTime(selectedYear, selectedMonth, dateEnd.Day, 23, 59, 59);
 
-                            DateTime adjustedDateStart = new DateTime(selectedYear, selectedMonth, dateStart.Day, dateStart.Hour, dateStart.Minute, dateStart.Second);
-                            DateTime adjustedDateEnd = new DateTime(selectedYear, selectedMonth, dateEnd.Day, dateEnd.Hour, dateEnd.Minute, dateEnd.Second);
-
-                            // Überprüfen, ob das mittlere Datum zwischen dem ersten und letzten liegt
-                            if (adjustedDateStart <= dateToolTip && dateToolTip <= adjustedDateStart)
+                            // Prüfen, ob das aktuelle Datum (dateToolTip) innerhalb des Terminzeitraums liegt
+                            if (adjustedDateStart <= dateToolTip && dateToolTip <= adjustedDateEnd)
                             {
-                                test += row.Field<string>("text");
-
-                                test += ", ";
-
+                                test += row.Field<string>("text") + ", ";
                             }
 
-
-                            bool isDifferentdays = adjustedDateStart.Day != adjustedDateEnd.Day;
-
-                            if (isDifferentdays && adjustedDateEnd >= dateToolTip && dateToolTip >= adjustedDateEnd)
-                            {
-                                test += row.Field<string>("text");
-
-                                test += ", ";
-
-                            }
-
-
-
+                            // Feiertag anhängen, falls vorhanden
                             if (dayLabel.BackColor == Color.Red)
                             {
                                 var holiday = holidays.FirstOrDefault(h => h.Date == dateToolTip);
-                                testHolidayToAdd = " " + holiday.LocalName;
+                                if (holiday != null)
+                                    testHolidayToAdd = " " + holiday.LocalName;
                             }
-
                         }
+
+                        // Letztes Komma entfernen, wenn vorhanden
+                        if (test.EndsWith(", "))
+                            test = test.Substring(0, test.Length - 2);
 
                         boldedOrHoliDayToolTip.SetToolTip(dayLabel, $"{test}{testHolidayToAdd}");
 
-                        test = ""; testHolidayToAdd = "";
+                        test = "";
+                        testHolidayToAdd = "";
                     }
+
 
                     Controls.Add(dayLabel);
 
