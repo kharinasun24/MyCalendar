@@ -269,7 +269,7 @@ namespace MyCalendar
                 return;
             }
 
-            //TODO: If n, it may exceed the monthly limit.
+            //TODO: If n, it may exceed the monthly limit but should not exceed yearly limit.
             /*
             if (repeat != "n" && (startDate.Month != endDate.Month || startDate.Year != endDate.Year))
             {
