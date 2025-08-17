@@ -45,6 +45,9 @@ namespace MyCalendar
 
 
             Size = new Size(900, 600);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = true;
 
             InitializeCulture();
 
@@ -282,6 +285,8 @@ namespace MyCalendar
         {
             holidays = await LoadHolidaysAsync();
 
+            appointments = dateDao.GetDatesFor(day, month, year);
+
             // Entfernen der alten Kalender-Labels
             RemoveOldCalendarLabels();
             List<KeyValuePair<string, DateTime>> appointmentsToIDsDict = StringValidators.Instance.AppointmentsToDateTimeDict(day, month, year, appointments);
@@ -297,7 +302,7 @@ namespace MyCalendar
 
             DateTime givenDate;
             // Labels für die Tage des Monats erstellen mit
-            string test = "";
+            string dateNameAsTooltip = "";
             string testHolidayToAdd = "";
             for (int d = 1; d <= daysInMonth; d++)
             {
@@ -313,6 +318,11 @@ namespace MyCalendar
                 DateTime currentDateCal = DateTime.Now.Date;
 
                 ToolTip boldedOrHoliDayToolTip = new ToolTip();
+
+                boldedOrHoliDayToolTip.InitialDelay = 10;    // 0,01 Sekunden bis zur Anzeige
+                //boldedOrHoliDayToolTip.AutoPopDelay = 5000;   // 5 Sekunden sichtbar
+                //boldedOrHoliDayToolTip.ReshowDelay = 100;     // 0,1 Sekunden zwischen zwei Tooltips
+                boldedOrHoliDayToolTip.ShowAlways = true;
 
                 if (dateExists && isNotInExceptions)
                 {
@@ -338,7 +348,7 @@ namespace MyCalendar
 
                     if (appointmentsToIDsDict.Any(kvp => kvp.Value == givenDate))
                     {
-                        appointments = dateDao.GetDatesFor(day, month, year);
+                        //appointments = dateDao.GetDatesFor(day, month, year);
 
                         int selectedMonth = monthCalendar.SelectionStart.Month;
                         int selectedYear = monthCalendar.SelectionStart.Year;
@@ -361,7 +371,7 @@ namespace MyCalendar
                             // Prüfen, ob das aktuelle Datum (dateToolTip) innerhalb des Terminzeitraums liegt
                             if (adjustedDateStart <= dateToolTip && dateToolTip <= adjustedDateEnd)
                             {
-                                test += row.Field<string>("text") + ", ";
+                                dateNameAsTooltip += row.Field<string>("text") + ", ";
                             }
 
                             // Feiertag anhängen, falls vorhanden
@@ -374,12 +384,12 @@ namespace MyCalendar
                         }
 
                         // Letztes Komma entfernen, wenn vorhanden
-                        if (test.EndsWith(", "))
-                            test = test.Substring(0, test.Length - 2);
+                        if (dateNameAsTooltip.EndsWith(", "))
+                            dateNameAsTooltip = dateNameAsTooltip.Substring(0, dateNameAsTooltip.Length - 2);
 
-                        boldedOrHoliDayToolTip.SetToolTip(dayLabel, $"{test}{testHolidayToAdd}");
+                        boldedOrHoliDayToolTip.SetToolTip(dayLabel, $"{dateNameAsTooltip}{testHolidayToAdd}");
 
-                        test = "";
+                        dateNameAsTooltip = "";
                         testHolidayToAdd = "";
                     }
 

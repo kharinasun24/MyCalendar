@@ -80,6 +80,9 @@ namespace MyCalendar
             dateDao = new DateDao();
 
             Size = new Size(800, 500);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = true;
 
             labelStart = new System.Windows.Forms.Label();
             labelStart.Location = new Point(10, 10);

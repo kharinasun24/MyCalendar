@@ -26,6 +26,9 @@ namespace MyCalendar
         public ContactsForm()
         {
             Size = new Size(550, 400);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = true;
 
             contactDao = new ContactDao();
             languageDao = new LanguageDao();

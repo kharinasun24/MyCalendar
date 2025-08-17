@@ -84,6 +84,9 @@ namespace MyCalendar
             dateDao = new DateDao();
 
             Size = new Size(800, 500);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = true;
 
             textBox1 = new System.Windows.Forms.TextBox();
             textBox1.Location = new Point(10, 100);

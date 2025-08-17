@@ -47,6 +47,9 @@ namespace MyCalendar
             this.contactsForm = contactsForm;
 
             Size = new Size(600, 500);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = true;
 
             geoFile = new GeoFile();
 
