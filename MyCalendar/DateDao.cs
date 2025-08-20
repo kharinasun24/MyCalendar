@@ -125,8 +125,7 @@ namespace MyCalendar
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-
-                //TODO: Legacy...  
+  
                 string sql = $@"SELECT * FROM dates WHERE (repeat = 'm' AND (CAST(SUBSTR(start, 7, 4) AS INT) < {formattedYear} OR (CAST(SUBSTR(start, 7, 4) AS INT) = {formattedYear} AND CAST(SUBSTR(start, 4, 2) AS INT) <= {formattedMonth}))) OR (repeat = 'n' AND ((start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%') OR (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%'))) OR (repeat = 'y' AND (CAST(SUBSTR(start, 7, 4) AS INT) <= {formattedYear}) AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'));";
 
                 //TODO: If n, it may exceed the monthly limit, this will be the next goal:

@@ -171,6 +171,9 @@
   <data name="Do you really want to delete contact?" xml:space="preserve">
     <value>Вы действительно хотите удалить контакт?</value>
   </data>
+  <data name="End date must be after start date." xml:space="preserve">
+    <value>Дата окончания должна быть после даты начала.</value>
+  </data>
   <data name="Do you really want to delete date?" xml:space="preserve">
     <value>Вы действительно хотите удалить дату?</value>
   </data>

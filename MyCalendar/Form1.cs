@@ -270,7 +270,7 @@ namespace MyCalendar
             Button chtButton = new System.Windows.Forms.Button
             {
                 Text = " - 👥 - ",
-                Location = new Point(120, 320),
+                Location = new Point(10, 500),
                 AutoSize = true
             };
 
@@ -345,6 +345,24 @@ namespace MyCalendar
                         Font = new System.Drawing.Font("Arial", 8, FontStyle.Bold) // Setzt den Text auf fett
                     };
 
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                    var dateForHandler = givenDate.Date;
+
+                    dayLabel.Click += (sender, e) =>
+                    {
+                        // Optional: Datum aus Tag holen, falls du es lieber dort speicherst
+                        // var dateForHandler = (DateTime)((Label)sender).Tag;
+
+                        var holiday = holidays?.FirstOrDefault(h => h.Date.Date == dateForHandler);
+                        string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
+                        MessageBox.Show($"Du hast den Tag {dateForHandler:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
+                    };
+
+
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
                     if (appointmentsToIDsDict.Any(kvp => kvp.Value == givenDate))
                     {
@@ -371,7 +389,7 @@ namespace MyCalendar
                             // Prüfen, ob das aktuelle Datum (dateToolTip) innerhalb des Terminzeitraums liegt
                             if (adjustedDateStart <= dateToolTip && dateToolTip <= adjustedDateEnd)
                             {
-                                dateNameAsTooltip += row.Field<string>("text") + ", ";
+                                dateNameAsTooltip += "-> " + row.Field<string>("text") + "\n";
                             }
 
                             // Feiertag anhängen, falls vorhanden
@@ -384,14 +402,16 @@ namespace MyCalendar
                         }
 
                         // Letztes Komma entfernen, wenn vorhanden
-                        if (dateNameAsTooltip.EndsWith(", "))
-                            dateNameAsTooltip = dateNameAsTooltip.Substring(0, dateNameAsTooltip.Length - 2);
+                        //if (dateNameAsTooltip.EndsWith(", "))
+                        //    dateNameAsTooltip = dateNameAsTooltip.Substring(0, dateNameAsTooltip.Length - 2);
 
                         boldedOrHoliDayToolTip.SetToolTip(dayLabel, $"{dateNameAsTooltip}{testHolidayToAdd}");
 
                         dateNameAsTooltip = "";
                         testHolidayToAdd = "";
                     }
+
+
 
 
                     Controls.Add(dayLabel);
@@ -432,6 +452,26 @@ namespace MyCalendar
                         boldedOrHoliDayToolTip.SetToolTip(dayLabel, $"{testHolidayToAdd}");
                         testHolidayToAdd = "";
                     }
+
+
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                    var dateForHandler = givenDate.Date;
+
+                    dayLabel.Click += (sender, e) =>
+                    {
+                        // Optional: Datum aus Tag holen, falls du es lieber dort speicherst
+                        // var dateForHandler = (DateTime)((Label)sender).Tag;
+
+                        var holiday = holidays?.FirstOrDefault(h => h.Date.Date == dateForHandler);
+                        string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
+                        MessageBox.Show($"Du hast den Tag {dateForHandler:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
+                    };
+
+
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
                     Controls.Add(dayLabel);
 
@@ -486,7 +526,8 @@ namespace MyCalendar
             Controls.Add(placeHolder);
         }
 
-
+        //TODO: Was man machen könnte: Im unteren Kalender wird auf einen Tag geklickt und nur die Termine dieses Tages werden angezeigt.
+        //Dann brauchen wir noch einen Button Show ALL, um alle Termine wieder anzuzeigen.
 
 
         private void UpdateAppointments(int day, int month, int year)

@@ -258,8 +258,7 @@ namespace MyCalendar
 
             if (duration < 1)
             {
-                //TODO: I18n.
-                MessageBox.Show("Enddatum muss nach dem Startdatum liegen.");
+                MessageBox.Show(resourceManager.GetString("End date must be after start date."));
                 return;
             }
 

@@ -177,6 +177,9 @@
   <data name="Do you want to delete the entire series (yes) or just this individual event (no)?" xml:space="preserve">
     <value>Egész sorozatot (yes) törölni vagy csak ezt (no)?</value>
   </data>
+  <data name="End date must be after start date." xml:space="preserve">
+    <value>Az időpont vége nem lehett a kezdete előtt.</value>
+  </data>
   <data name="email" xml:space="preserve">
     <value>email</value>
   </data>
