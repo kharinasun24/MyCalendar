@@ -299,7 +299,7 @@ namespace MyCalendar
 
         private void SaveDate(string text, DateTime start, DateTime end, int duration, string repeat)
         {
-            dateDao.saveDate(
+            dateDao.SaveDate(
                 text,
                 start.ToString("dd.MM.yyyy HH:mm"),
                 end.ToString("dd.MM.yyyy HH:mm"),

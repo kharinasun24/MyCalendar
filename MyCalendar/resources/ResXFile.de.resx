@@ -168,6 +168,9 @@
   <data name="Could not read ICS file!" xml:space="preserve">
     <value>Konnte ICS-Datei nicht lesen!</value>
   </data>
+  <data name="Show all dates" xml:space="preserve">
+    <value>Alle Termine anzeigen</value>
+  </data>
   <data name="Do you really want to delete contact?" xml:space="preserve">
     <value>Wollen Sie den Eintrag wirklich löschen?</value>
   </data>

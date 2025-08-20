@@ -1,9 +1,13 @@
 ﻿using Ical.Net.CalendarComponents;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using System.Xml;
-using System.Resources;
+using Ical.Net.DataTypes;
+using Ical.Net.Serialization;
 using MyCalendar;
+using System.Data;
+using System.Globalization;
+using System.Resources;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace MyCalendar
 {
@@ -274,15 +278,49 @@ namespace MyCalendar
 
                     string duration = durationInt.ToString();
 
-                    // Generell gehe ich an dieser Stelle davon aus, dass der Termin keine Wdh. hat.
-                    dateDao.saveDate(text, start, end, duration, "n");
-
-                    // ... weitere Eigenschaften können ausgeben werden.
+                    //TODO: Generell gehe ich an dieser Stelle davon aus, dass der Termin keine Wdh. hat.
+                    dateDao.SaveDate(text, start, end, duration, "n");
 
                 }
             }
         }
 
-        
+        public void WriteICS()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "ICS files (*.ics)|*.ics|All files (*.*)|*.*";
+            saveFileDialog.Title = "Save ICS File";
+            saveFileDialog.FileName = "export.ics";
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Neues Kalender-Objekt anlegen
+                var calendar = new Ical.Net.Calendar();
+
+                // Alle Termine aus der Datenbank holen
+                List<Date> allDates = dateDao.GetAllDates(); // <-- anpassen an deine Methode
+
+                foreach (var date in allDates)
+                {
+                    var calendarEvent = new CalendarEvent
+                    {
+                        Summary = date.Text,  // Titel
+                        DtStart = new CalDateTime(DateTime.ParseExact(date.Start, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture)),
+                        DtEnd = new CalDateTime(DateTime.ParseExact(date.End, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture)),
+                        Description = "Exported from MyCalendar"
+                    };
+
+                    calendar.Events.Add(calendarEvent);
+                }
+
+                // Kalender in String serialisieren
+                var serializer = new CalendarSerializer();
+                string serializedCalendar = serializer.SerializeToString(calendar);
+
+                // Datei schreiben
+                File.WriteAllText(saveFileDialog.FileName, serializedCalendar, Encoding.UTF8);
+            }
+        }
+
     }
 }

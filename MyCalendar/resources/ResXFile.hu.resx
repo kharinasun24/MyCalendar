@@ -165,6 +165,9 @@
   <data name="Contacts need a name!" xml:space="preserve">
     <value>Kapcsolatok nevei hiányoznak! </value>
   </data>
+  <data name="Show all dates" xml:space="preserve">
+    <value>Minden időpontot megmutatni</value>
+  </data>
   <data name="Could not read ICS file!" xml:space="preserve">
     <value>Could not read ICS file!</value>
   </data>

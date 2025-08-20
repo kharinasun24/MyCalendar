@@ -121,10 +121,12 @@ namespace MyCalendar
 
         private void InitializeShowAllButton()
         {
+            string showAllDates = resourceManager.GetString("Show all dates");
+
             btnShowAllAppointments = new Button
             {
-                Text = "Alle Termine anzeigen",
-                Width = 150,
+                Text = showAllDates,
+                Width = 250,
                 Height = 30,
                 Location = new Point(260, 320) // Position anpassen
             };
@@ -181,7 +183,7 @@ namespace MyCalendar
 
             Button readIcsButton = new Button
             {
-                Text = "ICS", 
+                Text = "import ICS", 
                 Location = new Point(10, 320),
                 AutoSize = true,
                 Size = new Size(100, 50)
@@ -191,6 +193,21 @@ namespace MyCalendar
 
             Controls.Add(readIcsButton);
 
+            /////////////////////////////////////////////////////////////////////////////////////////
+
+            Button writeIcsButton = new Button
+            {
+                Text = "export ICS",
+                Location = new Point(120, 320),
+                AutoSize = true,
+                Size = new Size(100, 50)
+            };
+
+            writeIcsButton.Click += WriteIcsButton_Click;
+
+            Controls.Add(writeIcsButton);
+
+            /////////////////////////////////////////////////////////////////////////////////////////
 
             languageComboBox = new System.Windows.Forms.ComboBox();
             languageComboBox.Items.Add("Deutsch");
@@ -371,27 +388,8 @@ namespace MyCalendar
                         Font = new System.Drawing.Font("Arial", 8, FontStyle.Bold) // Setzt den Text auf fett
                     };
 
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                     dayLabel.Click += DayLabel_Click;
-
-                    /*
-                    var dateForHandler = givenDate.Date;
-
-                    dayLabel.Click += (sender, e) =>
-                    {
-                        // Optional: Datum aus Tag holen, falls du es lieber dort speicherst
-                        // var dateForHandler = (DateTime)((Label)sender).Tag;
-
-                        var holiday = holidays?.FirstOrDefault(h => h.Date.Date == dateForHandler);
-                        string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
-                        MessageBox.Show($"Du hast den Tag {dateForHandler:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
-                    };
-                    */
-
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
                     if (appointmentsToIDsDict.Any(kvp => kvp.Value == givenDate))
                     {
@@ -484,27 +482,7 @@ namespace MyCalendar
                     }
 
 
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
                     dayLabel.Click += DayLabel_Click;
-
-                    /*
-                    var dateForHandler = givenDate.Date;
-
-                    dayLabel.Click += (sender, e) =>
-                    {
-                        // Optional: Datum aus Tag holen, falls du es lieber dort speicherst
-                        // var dateForHandler = (DateTime)((Label)sender).Tag;
-
-                        var holiday = holidays?.FirstOrDefault(h => h.Date.Date == dateForHandler);
-                        string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
-                        MessageBox.Show($"Du hast den Tag {dateForHandler:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
-                    };
-                    */
-
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
                     Controls.Add(dayLabel);
 
@@ -598,10 +576,6 @@ namespace MyCalendar
 
             Controls.Add(placeHolder);
         }
-
-        //TODO: Was man machen könnte: Im unteren Kalender wird auf einen Tag geklickt und nur die Termine dieses Tages werden angezeigt.
-        //Dann brauchen wir noch einen Button Show ALL, um alle Termine wieder anzuzeigen.
-
 
         private void UpdateAppointments(int day, int month, int year)
         {
@@ -814,14 +788,38 @@ namespace MyCalendar
             contactsForm.ShowDialog();
         }
 
+        private void WriteIcsButton_Click(object sender, EventArgs e)
+        {
+
+            Reader icsReader = new Reader();
+
+            // Übergib deine appointments-Liste an den Reader, falls notwendig
+            icsReader.WriteICS();
+
+        }
+
         private void ReadIcsButton_Click(object sender, EventArgs e)
         {
             Reader icsReader = new Reader();
 
             icsReader.ReadICS();
 
-            Application.Restart();
-            Environment.Exit(0);
+            //Application.Restart();
+            //Environment.Exit(0);
+
+            //Besser: Grid neu binden.
+            //dataGridViewAppointmentsOnClickedDay.DataSource = null;
+            dataGridViewAppointmentsOnClickedDay.DataSource = appointments;
+
+            // Kalender neu zeichnen
+            RemoveOldCalendarLabels();
+            CreateCalendar(monthCalendar.SelectionStart.Year, monthCalendar.SelectionStart.Month, monthCalendar.SelectionStart.Day);
+
+            // "Klick" auf MonthCalendar simulieren, damit das Grid aktualisiert wird
+            MonthCalendar_DateChanged(
+                monthCalendar,
+                new DateRangeEventArgs(monthCalendar.SelectionStart, monthCalendar.SelectionEnd)
+            );
 
         }
 

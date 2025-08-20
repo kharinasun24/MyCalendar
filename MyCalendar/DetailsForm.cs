@@ -426,7 +426,7 @@ e)
                     repeat = "y";
                 }
 
-                dateDao.updateDate(id, textBox1.Text, start, end, duration.ToString(), repeat);
+                dateDao.UpdateDate(id, textBox1.Text, start, end, duration.ToString(), repeat);
 
                 form1.DrawAppointmentsOnClickedDay(form1.monthCalendar.SelectionStart.Day, form1.monthCalendar.SelectionStart.Month, form1.monthCalendar.SelectionStart.Year, dateDao);
 

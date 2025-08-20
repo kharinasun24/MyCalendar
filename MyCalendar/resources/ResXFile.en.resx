@@ -171,6 +171,9 @@
   <data name="Do you really want to delete contact?" xml:space="preserve">
     <value>Do you really want to delete contact?</value>
   </data>
+  <data name="Show all dates" xml:space="preserve">
+    <value>Show all dates</value>
+  </data>
   <data name="Do you really want to delete date?" xml:space="preserve">
     <value>Do you really want to delete date?</value>
   </data>

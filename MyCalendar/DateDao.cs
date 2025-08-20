@@ -232,7 +232,7 @@ namespace MyCalendar
         }
 
 
-        public void updateDate(string id, string text, string start, string end, string duration, string repeat)
+        public void UpdateDate(string id, string text, string start, string end, string duration, string repeat)
         {
             Date date = new Date(id, text, start, end, duration, repeat);
 
@@ -260,7 +260,7 @@ namespace MyCalendar
             }
         }
 
-        public void saveDate(string text, string start, string end, string duration, string repeat)
+        public void SaveDate(string text, string start, string end, string duration, string repeat)
         {
             Date date = new Date("-1", text, start, end, duration, repeat);
 
@@ -327,6 +327,39 @@ namespace MyCalendar
             return dateTimeList.ToArray();
 
         }
+
+        public List<Date> GetAllDates()
+        {
+            List<Date> dates = new List<Date>();
+
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
+            using (var connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+                
+                using (var command = new SQLiteCommand("SELECT text, start, end, duration, repeat FROM Dates", connection))
+                
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var date = new Date(
+                            reader["id_date"].ToString(),
+                            reader["text"].ToString(),
+                            reader["start"].ToString(),
+                            reader["end"].ToString(),
+                            reader["duration"].ToString(),
+                            reader["repeat"].ToString()
+                        );
+
+                        dates.Add(date);
+                    }
+                }
+            }
+
+            return dates;
+        }
+
 
         public List<Date> GetExceptions()
         {
