@@ -1,8 +1,9 @@
-﻿using System.Data;
+﻿using Nager.Holiday;
+using System;
+using System.Data;
 using System.Globalization;
 using System.Resources;
 using System.Security.Principal;
-using Nager.Holiday;
 
 
 namespace MyCalendar
@@ -27,6 +28,7 @@ namespace MyCalendar
         private System.Windows.Forms.Timer appointmentTimer;
 
         private Button showWeatherButton;
+        private Button btnShowAllAppointments;
 
         private Label placeHolder;
         private Label pickDay;
@@ -56,6 +58,8 @@ namespace MyCalendar
             CreateCalendar();
 
             CreateUIControls();
+
+            InitializeShowAllButton();
 
         }
 
@@ -113,6 +117,27 @@ namespace MyCalendar
 
             Controls.Add(dataGridViewAppointmentsOnClickedDay);
 
+        }
+
+        private void InitializeShowAllButton()
+        {
+            btnShowAllAppointments = new Button
+            {
+                Text = "Alle Termine anzeigen",
+                Width = 150,
+                Height = 30,
+                Location = new Point(260, 320) // Position anpassen
+            };
+            btnShowAllAppointments.Click += BtnShowAllAppointments_Click;
+            Controls.Add(btnShowAllAppointments);
+        }
+
+        private void BtnShowAllAppointments_Click(object sender, EventArgs e)
+        {
+            if (appointments != null)
+            {
+                dataGridViewAppointmentsOnClickedDay.DataSource = appointments;
+            }
         }
 
 
@@ -340,13 +365,17 @@ namespace MyCalendar
                         TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
                         BorderStyle = BorderStyle.FixedSingle,
                         Location = new System.Drawing.Point(40 * ((startDayOfWeek + d - 1) % 7) + 550, 40 * ((startDayOfWeek + d - 1) / 7) + 265),
-                        Tag = "calendar", // Setze ein spezifisches Tag für Kalender-Labels
+                        Name = "calendar",              // ← Kennzeichnung hierher
+                        Tag = givenDate.Date,
                         BackColor = backgroundColor,
                         Font = new System.Drawing.Font("Arial", 8, FontStyle.Bold) // Setzt den Text auf fett
                     };
 
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+                    dayLabel.Click += DayLabel_Click;
+
+                    /*
                     var dateForHandler = givenDate.Date;
 
                     dayLabel.Click += (sender, e) =>
@@ -358,7 +387,7 @@ namespace MyCalendar
                         string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
                         MessageBox.Show($"Du hast den Tag {dateForHandler:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
                     };
-
+                    */
 
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -439,7 +468,8 @@ namespace MyCalendar
                         TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
                         BorderStyle = BorderStyle.FixedSingle,
                         Location = new System.Drawing.Point(40 * ((startDayOfWeek + d - 1) % 7) + 550, 40 * ((startDayOfWeek + d - 1) / 7) + 265),
-                        Tag = "calendar", // Setze ein spezifisches Tag für Kalender-Labels
+                        Name = "calendar",              // ← Kennzeichnung hierher
+                        Tag = givenDate.Date,
                         BackColor = backgroundColor,
                         Font = new System.Drawing.Font("Arial", 8)
                     };
@@ -456,6 +486,9 @@ namespace MyCalendar
 
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+                    dayLabel.Click += DayLabel_Click;
+
+                    /*
                     var dateForHandler = givenDate.Date;
 
                     dayLabel.Click += (sender, e) =>
@@ -467,7 +500,7 @@ namespace MyCalendar
                         string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
                         MessageBox.Show($"Du hast den Tag {dateForHandler:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
                     };
-
+                    */
 
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -478,6 +511,46 @@ namespace MyCalendar
                 }
             }
         }
+
+        private void DayLabel_Click(object sender, EventArgs e)
+        {
+            var lbl = (Label)sender;
+
+            if (lbl.Tag is DateTime date)
+            {
+                // Optional: kleine Bestätigung
+                // var holiday = holidays?.FirstOrDefault(h => h.Date.Date == date);
+                // string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
+                // MessageBox.Show($"Du hast den Tag {date:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
+
+                FilterGridByDate(date);
+            }
+        }
+
+
+        private void FilterGridByDate(DateTime date)
+        {
+            if (appointments == null)
+                return;
+
+            // gleiche Kultur wie im Rest: "dd.MM.yyyy HH:mm"
+            var rows = appointments.AsEnumerable().Where(r =>
+            {
+                if (!DateTime.TryParseExact(r.Field<string>("start"), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start))
+                    return false;
+                if (!DateTime.TryParseExact(r.Field<string>("end"), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
+                    return false;
+
+                return start.Date <= date.Date && end.Date >= date.Date;
+            });
+
+            var filtered = appointments.Clone(); // gleiche Spalten wie Original
+            foreach (var row in rows) filtered.ImportRow(row);
+
+            // wenn nichts gefunden: leere Tabelle mit gleicher Struktur anzeigen
+            dataGridViewAppointmentsOnClickedDay.DataSource = filtered;
+        }
+
 
 
         private void CreateCalendar()
@@ -595,12 +668,13 @@ namespace MyCalendar
         {
             for (int i = Controls.Count - 1; i >= 0; i--)
             {
-                if (Controls[i] is Label label && label.Tag?.ToString() == "calendar")
+                if (Controls[i] is Label label && label.Name == "calendar")
                 {
                     Controls.Remove(label);
                 }
             }
         }
+
 
 
 
