@@ -30,6 +30,8 @@ namespace MyCalendar
         private Button showWeatherButton;
         private Button btnShowAllAppointments;
 
+        private ToolTip boldedOrHoliDayToolTip;
+
         private Label placeHolder;
         private Label pickDay;
         private Label pickClock;
@@ -55,6 +57,8 @@ namespace MyCalendar
 
             CreateTimer();
 
+            InitToolTip();
+
             CreateCalendar();
 
             CreateUIControls();
@@ -63,6 +67,47 @@ namespace MyCalendar
 
         }
 
+        private void InitToolTip()
+        {
+            boldedOrHoliDayToolTip = new ToolTip
+            {
+                OwnerDraw = true,
+                InitialDelay = 100,
+                ReshowDelay = 100,
+                AutoPopDelay = 5000,
+                ShowAlways = true
+            };
+
+            boldedOrHoliDayToolTip.Draw += (s, e) =>
+            {
+                e.Graphics.FillRectangle(Brushes.LightGreen, e.Bounds); // Hintergrund hellgrün
+                e.Graphics.DrawRectangle(Pens.Green, e.Bounds);         // Rahmen
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    e.ToolTipText,
+                    new Font("Segoe UI", 10, FontStyle.Bold),
+                    e.Bounds,
+                    Color.Black,
+                    TextFormatFlags.VerticalCenter | TextFormatFlags.Left
+                );
+            };
+
+            boldedOrHoliDayToolTip.Popup += (s, e) =>
+            {
+                // Den Text des Tooltips für das aktuelle Control holen
+                string text = boldedOrHoliDayToolTip.GetToolTip(e.AssociatedControl);
+
+                using (Font f = new Font("Segoe UI", 10, FontStyle.Bold))
+                {
+                    Size textSize = TextRenderer.MeasureText(text, f);
+
+                    // Ein bisschen Padding hinzufügen
+                    e.ToolTipSize = new Size(textSize.Width + 10, textSize.Height + 6);
+                }
+            };
+
+
+        }
         private void InitializeGrid()
         {
 
@@ -322,7 +367,7 @@ namespace MyCalendar
 
 
         }
-
+         
         private async Task CreateCalendar(int year, int month, int day)
         {
             holidays = await LoadHolidaysAsync();
@@ -346,6 +391,8 @@ namespace MyCalendar
             // Labels für die Tage des Monats erstellen mit
             string dateNameAsTooltip = "";
             string testHolidayToAdd = "";
+            
+
             for (int d = 1; d <= daysInMonth; d++)
             {
                 givenDate = new DateTime(year, month, d);
@@ -358,13 +405,6 @@ namespace MyCalendar
                 bool isNotInExceptions = StringValidators.Instance.IsNotInExceptionsMethod(appointmentsToIDsDict, givenDate, year, month, d);
 
                 DateTime currentDateCal = DateTime.Now.Date;
-
-                ToolTip boldedOrHoliDayToolTip = new ToolTip();
-
-                boldedOrHoliDayToolTip.InitialDelay = 10;    // 0,01 Sekunden bis zur Anzeige
-                //boldedOrHoliDayToolTip.AutoPopDelay = 5000;   // 5 Sekunden sichtbar
-                //boldedOrHoliDayToolTip.ReshowDelay = 100;     // 0,1 Sekunden zwischen zwei Tooltips
-                boldedOrHoliDayToolTip.ShowAlways = true;
 
                 if (dateExists && isNotInExceptions)
                 {
@@ -398,10 +438,6 @@ namespace MyCalendar
                         int selectedMonth = monthCalendar.SelectionStart.Month;
                         int selectedYear = monthCalendar.SelectionStart.Year;
                         StringValidators.Instance.GetMonthsAppointments(selectedMonth, selectedYear, appointments, exceptions);
-
-                        boldedOrHoliDayToolTip.ToolTipIcon = ToolTipIcon.None;
-                        boldedOrHoliDayToolTip.IsBalloon = true;
-                        boldedOrHoliDayToolTip.ShowAlways = true;
 
                         foreach (DataRow row in appointments.Rows)
                         {
@@ -451,10 +487,6 @@ namespace MyCalendar
 
                     bool isHoliday = holidays?.Any(h => h.Date.Date == givenDate.Date) ?? false;
                     Color backgroundColor = givenDate.Date == currentDateCal ? Color.LightBlue : (isHoliday ? Color.Red : SystemColors.Control);
-
-                    boldedOrHoliDayToolTip.ToolTipIcon = ToolTipIcon.None;
-                    boldedOrHoliDayToolTip.IsBalloon = true;
-                    boldedOrHoliDayToolTip.ShowAlways = true;
 
                     DateTime dateToolTip = DateTime.ParseExact(givenDate.ToString().Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
@@ -581,20 +613,15 @@ namespace MyCalendar
         {
             appointments = dateDao.GetDatesFor(day, month, year);
 
-
-
             exceptions = UpdateExceptions(exceptions);
 
             StringValidators.Instance.GetMonthsAppointments(monthCalendar.SelectionStart.Month, monthCalendar.SelectionStart.Year, appointments, exceptions);
-
-
 
             dataGridViewAppointmentsOnClickedDay.DataSource = appointments;
         }
 
         private List<Date> UpdateExceptions(List<Date> exceptions)
         {
-
             exceptions = dateDao.GetExceptions();
 
             return exceptions;
@@ -602,7 +629,6 @@ namespace MyCalendar
 
         public void DrawAppointmentsOnClickedDay(int day, int month, int year, DateDao dateDao)
         {
-
             UpdateAppointments(day, month, year);
 
             LoadHolidays();

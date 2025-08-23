@@ -278,7 +278,7 @@ namespace MyCalendar
 
                     string duration = durationInt.ToString();
 
-                    //TODO: Generell gehe ich an dieser Stelle davon aus, dass der Termin keine Wdh. hat.
+                    //Generell gehe ich an dieser Stelle davon aus, dass der Termin keine Wdh. hat.
                     dateDao.SaveDate(text, start, end, duration, "n");
 
                 }
