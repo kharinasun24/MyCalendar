@@ -543,21 +543,46 @@ namespace MyCalendar
             if (appointments == null)
                 return;
 
-            // gleiche Kultur wie im Rest: "dd.MM.yyyy HH:mm"
-            var rows = appointments.AsEnumerable().Where(r =>
+            var filtered = appointments.Clone();
+
+            foreach (DataRow row in appointments.Rows)
             {
-                if (!DateTime.TryParseExact(r.Field<string>("start"), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start))
-                    return false;
-                if (!DateTime.TryParseExact(r.Field<string>("end"), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
-                    return false;
+                string repeat = row.Field<string>("repeat"); // "y" = jährlich, "m" = monatlich, "" = einmalig
 
-                return start.Date <= date.Date && end.Date >= date.Date;
-            });
+                if (!DateTime.TryParseExact(row.Field<string>("start"), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start))
+                    continue;
+                if (!DateTime.TryParseExact(row.Field<string>("end"), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var end))
+                    continue;
 
-            var filtered = appointments.Clone(); // gleiche Spalten wie Original
-            foreach (var row in rows) filtered.ImportRow(row);
+                bool include = false;
 
-            // wenn nichts gefunden: leere Tabelle mit gleicher Struktur anzeigen
+                switch (repeat)
+                {
+                    case "y": // jährliche Wiederholung
+                              // Aktuelles Jahr für Start-End prüfen
+                        DateTime startY = new DateTime(date.Year, start.Month, start.Day);
+                        DateTime endY = new DateTime(date.Year, end.Month, end.Day);
+                        include = (date.Date >= startY.Date && date.Date <= endY.Date);
+                        break;
+
+                    case "m": // monatliche Wiederholung
+                        if (date.Day == start.Day)
+                        {
+                            DateTime startM = new DateTime(date.Year, date.Month, start.Day);
+                            DateTime endM = new DateTime(date.Year, date.Month, end.Day);
+                            include = (date.Date >= startM.Date && date.Date <= endM.Date);
+                        }
+                        break;
+
+                    default: // einmalige Termine
+                        include = start.Date <= date.Date && end.Date >= date.Date;
+                        break;
+                }
+
+                if (include)
+                    filtered.ImportRow(row);
+            }
+
             dataGridViewAppointmentsOnClickedDay.DataSource = filtered;
         }
 

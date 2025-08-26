@@ -128,7 +128,7 @@ namespace MyCalendar
   
                 string sql = $@"SELECT * FROM dates WHERE (repeat = 'm' AND (CAST(SUBSTR(start, 7, 4) AS INT) < {formattedYear} OR (CAST(SUBSTR(start, 7, 4) AS INT) = {formattedYear} AND CAST(SUBSTR(start, 4, 2) AS INT) <= {formattedMonth}))) OR (repeat = 'n' AND ((start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonth}.%') OR (start LIKE '%.{formattedYear}%' AND start LIKE '%.{formattedMonthPreceding}.%'))) OR (repeat = 'y' AND (CAST(SUBSTR(start, 7, 4) AS INT) <= {formattedYear}) AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'));";
 
-                //TODO: If n, it may exceed the monthly limit, this will be the next goal:
+                //If n, it may exceed the monthly limit, this will be the next goal:
                 //string sql = $@"SELECT * FROM dates WHERE (repeat = 'm' AND (CAST(SUBSTR(start, 7, 4) AS INT) < {formattedYear} OR (CAST(SUBSTR(start, 7, 4) AS INT) = {formattedYear} AND CAST(SUBSTR(start, 4, 2) AS INT) <= {formattedMonth}))) OR (repeat = 'n' AND ((SUBSTR(start, 7, 4) || '-' || SUBSTR(start, 4, 2) || '-' || SUBSTR(start, 1, 2)) <= (SUBSTR(end, 7, 4) || '-' || SUBSTR(end, 4, 2) || '-' || SUBSTR(end, 1, 2)))) OR (repeat = 'y' AND (CAST(SUBSTR(start, 7, 4) AS INT) <= {formattedYear}) AND (start LIKE '%.{formattedMonth}.%' OR start LIKE '%.{formattedMonthPreceding}.%'));";
 
                 using (SQLiteCommand command = new SQLiteCommand(sql, connection))
@@ -160,7 +160,8 @@ namespace MyCalendar
                 connection.Close();
             }
 
-
+            //TODO: Exceptions werden hier nicht berücksichtigt!
+            //dates.RemoveAt(dates.Count - 1); Einfach die Exceptions rausmachen, sie werden ja korrekt in die DB geschrieben.
 
             return dates;
         }
