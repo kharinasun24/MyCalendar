@@ -644,7 +644,7 @@ namespace MyCalendar
 
             dataGridViewAppointmentsOnClickedDay.DataSource = appointments;
         }
-
+        
         private List<Date> UpdateExceptions(List<Date> exceptions)
         {
             exceptions = dateDao.GetExceptions();
@@ -652,14 +652,14 @@ namespace MyCalendar
             return exceptions;
         }
 
+
         public void DrawAppointmentsOnClickedDay(int day, int month, int year, DateDao dateDao)
         {
-            UpdateAppointments(day, month, year);
+           UpdateAppointments(day, month, year);
 
-            LoadHolidays();
+           LoadHolidays();
 
-            CreateCalendar(year, month, day);
-
+           CreateCalendar(year, month, day);
         }
 
 
@@ -729,7 +729,7 @@ namespace MyCalendar
         }
 
 
-
+        
         private void InitializeCulture()
         {
 
@@ -918,6 +918,7 @@ namespace MyCalendar
                         }
                         else if (result == DialogResult.No)
                         {
+                            /*
                             string exception_start = row.Cells["start"].Value.ToString();
                             DateTime selectedDate = monthCalendar.SelectionStart;
 
@@ -945,6 +946,15 @@ namespace MyCalendar
                             exception_end = formattedDate;
 
                             dateDao.WriteExceptionIntoExceptionTBL(idToDelete, exception_start, exception_end);
+                            */
+
+                            string exception_start = row.Cells["start"].Value.ToString();
+                            DateTime startDT = DateTime.ParseExact(exception_start, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+
+                            string exception_end = row.Cells["end"].Value.ToString();
+                            DateTime endDT = DateTime.ParseExact(exception_end, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+
+                            dateDao.WriteExceptionIntoExceptionTBL(idToDelete, startDT.ToString("dd.MM.yyyy"), endDT.ToString("dd.MM.yyyy"));
 
                             DrawAppointmentsOnClickedDay(d, m, y, dateDao);
 
@@ -963,7 +973,6 @@ namespace MyCalendar
 
                         if (result == DialogResult.Yes)
                         {
-
                             dateDao.DeleteEntryById(idToDelete);
                             int d = monthCalendar.SelectionStart.Day;
                             int m = monthCalendar.SelectionStart.Month;

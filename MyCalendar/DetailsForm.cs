@@ -94,12 +94,19 @@ namespace MyCalendar
 
                 Date elementDate = foundDates.First();
 
-                if ("y".Equals(elementDate.Repeat) || "m".Equals(elementDate.Repeat))
-                {
+                // Klick-Tag aus Form1 übernehmen
+                elementDate.SetDayMonthYearClickedByUser(
+                    f1.monthCalendar.SelectionStart.Day.ToString("00"),
+                    f1.monthCalendar.SelectionStart.Month.ToString("00"),
+                    f1.monthCalendar.SelectionStart.Year.ToString("0000")
+                );
 
-                    checkBoxMonthly.Visible = false;
-                    checkBoxYearly.Visible = false;
-                }
+                // Jetzt korrektes Occurrence berechnen
+                elementDate.ConfigureDate();
+
+                checkBoxMonthly.Checked = "m".Equals(elementDate.Repeat);
+                checkBoxYearly.Checked = "y".Equals(elementDate.Repeat);
+
 
                 //Die Form besteht aus einer TextBox und DatePickern.
                 textBox1 = new System.Windows.Forms.TextBox();
@@ -371,74 +378,62 @@ e)
 
         private void saveBtn_Click(object sender, EventArgs e)
         {
-
-            DialogResult result = MessageBox.Show(resourceManager.GetString("Are the checkboxes set correctly - monthly/yearly repeat?"),
-                                         resourceManager.GetString("Confirm and save"),
-                                         MessageBoxButtons.YesNo,
-                                         MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show(
+                resourceManager.GetString("Are the checkboxes set correctly - monthly/yearly repeat?"),
+                resourceManager.GetString("Confirm and save"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
 
             if (result == DialogResult.No)
             {
                 return;
             }
 
-            DateTime startDT = new DateTime(dateTimePickerStart.Value.Year,
-                                   dateTimePickerStart.Value.Month,
-                                   dateTimePickerStart.Value.Day,
-                                   dateTimePickerStart.Value.Hour,
-                                   dateTimePickerStart.Value.Minute,
-                                   dateTimePickerStart.Value.Second);
-
-
-            DateTime endDT = new DateTime(dateTimePickerEnd.Value.Year,
-                       dateTimePickerEnd.Value.Month,
-                       dateTimePickerEnd.Value.Day,
-                       dateTimePickerEnd.Value.Hour,
-                       dateTimePickerEnd.Value.Minute,
-                       dateTimePickerEnd.Value.Second);
+            DateTime startDT = dateTimePickerStart.Value;
+            DateTime endDT = dateTimePickerEnd.Value;
 
             if (startDT > endDT)
             {
+                MessageBox.Show("Startzeitpunkt darf nicht nach Endzeitpunkt liegen!");
                 return;
             }
 
-
-            TimeSpan d = dateTimePickerEnd.Value - dateTimePickerStart.Value;
-            int duration = d.Days;
-
-            duration++;
+            int duration = (int)Math.Ceiling((endDT.Date - startDT.Date).TotalDays) + 1;
 
             if (duration >= 1)
             {
+                string start = startDT.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+                string end = endDT.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
 
-                string start = dateTimePickerStart.Value.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
-                string end = dateTimePickerEnd.Value.ToString("dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
-
-                string repeat = "n";
-
-                if (checkBoxMonthly.Checked)
+                // Wiederholungswert bestimmen
+                string repeat = "n"; // kein Repeat
+                if (checkBoxMonthly.Checked && checkBoxYearly.Checked)
+                {
+                    MessageBox.Show("Bitte nur eine Wiederholungsart auswählen (monatlich ODER jährlich).");
+                    return;
+                }
+                else if (checkBoxMonthly.Checked)
                 {
                     repeat = "m";
                 }
                 else if (checkBoxYearly.Checked)
                 {
-
                     repeat = "y";
                 }
 
+                // speichern
                 dateDao.UpdateDate(id, textBox1.Text, start, end, duration.ToString(), repeat);
 
-                form1.DrawAppointmentsOnClickedDay(form1.monthCalendar.SelectionStart.Day, form1.monthCalendar.SelectionStart.Month, form1.monthCalendar.SelectionStart.Year, dateDao);
+                form1.DrawAppointmentsOnClickedDay(
+                    form1.monthCalendar.SelectionStart.Day,
+                    form1.monthCalendar.SelectionStart.Month,
+                    form1.monthCalendar.SelectionStart.Year,
+                    dateDao);
 
                 Close();
-
-                //Application.Restart();
-                //Environment.Exit(0);
-
             }
-
-
         }
+
 
         private void SetDateTimePickersDate(int day, int month, int year, DateTime givenDate, DateTime currentDate)
         {

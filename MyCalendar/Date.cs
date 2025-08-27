@@ -15,7 +15,7 @@ namespace MyCalendar
         public string start;
         public string end;
         private string duration;
-        private string repeat;
+        public string repeat;
 
         private string formattedDay; private string formattedMonth; private string formattedYear;
 

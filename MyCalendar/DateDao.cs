@@ -21,6 +21,14 @@ namespace MyCalendar
 
         }
 
+        public Date GetDateById(string id)
+        {
+            var entries = GetEntryById(id);
+            if (entries.Count > 0)
+                return entries[0]; // gibt das erste (und einzige) Element zurück
+            else
+                return null; // keine Einträge gefunden
+        }
 
         public DataTable GetDatesFor(int day, int month, int year)
         {
@@ -159,9 +167,6 @@ namespace MyCalendar
 
                 connection.Close();
             }
-
-            //TODO: Exceptions werden hier nicht berücksichtigt!
-            //dates.RemoveAt(dates.Count - 1); Einfach die Exceptions rausmachen, sie werden ja korrekt in die DB geschrieben.
 
             return dates;
         }
@@ -393,7 +398,6 @@ namespace MyCalendar
 
                 connection.Close();
             }
-
 
             return dates;
 

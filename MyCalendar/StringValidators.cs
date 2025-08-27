@@ -34,11 +34,13 @@ namespace MyCalendar
                 return _instance;
             }
         }
-
+        //TODO This was a dysfunctional one. The good on is below and ready for testing.
+        /*
         public bool IsNotInExceptionsMethod(List<KeyValuePair<string, DateTime>> appointmentsToIDsDict,
 
         DateTime givenAppointmentNotAdjusted, int year, int month, int day)
         {
+
             DateDao dateDao = new DateDao();
 
             // Liste der Ausnahmen abrufen
@@ -79,6 +81,55 @@ namespace MyCalendar
             // Falls keine Übereinstimmung gefunden wurde, false zurückgeben
             return false;
         }
+        */
+
+        public bool IsNotInExceptionsMethod(
+    List<KeyValuePair<string, DateTime>> appointmentsToIDsDict,
+    DateTime givenAppointmentNotAdjusted,
+    int year, int month, int day)
+        {
+            DateDao dateDao = new DateDao();
+
+            // Liste der Ausnahmen abrufen
+            List<Date> exceptions = dateDao.GetExceptions();
+
+            foreach (var kvp in appointmentsToIDsDict)
+            {
+                string appointmentId = kvp.Key;
+
+                // Wiederholungs-Info für diesen Termin holen
+                Date appt = dateDao.GetDateById(appointmentId);
+                if (appt.repeat == "n")
+                {
+                    // Einzeltermin → niemals durch Exceptions beeinflusst
+                    continue;
+                }
+
+                // prüfen, ob es für diese ID eine Exception gibt
+                var relevantExceptions = exceptions.Where(e => e.id == appointmentId).ToList();
+
+                if (relevantExceptions.Count == 0)
+                    continue;
+
+                // Datum anpassen: givenAppointmentNotAdjusted soll das angepasste Jahr und den Monat erhalten
+                DateTime givenAppointmentAdjusted = new DateTime(year, month, givenAppointmentNotAdjusted.Day);
+
+                foreach (var ex in relevantExceptions)
+                {
+                    DateTime startDate = DateTime.ParseExact(ex.start, "dd.MM.yyyy", CultureInfo.InvariantCulture).Date;
+                    DateTime endDate = DateTime.ParseExact(ex.end, "dd.MM.yyyy", CultureInfo.InvariantCulture).Date;
+
+                    if (givenAppointmentAdjusted.Date >= startDate && givenAppointmentAdjusted.Date <= endDate)
+                    {
+                        // Ausnahme greift → diesen Termin nicht anzeigen
+                        return false;
+                    }
+                }
+            }
+
+            // wenn keine passende Exception greift, Termin anzeigen
+            return true;
+        }
 
 
         public void GetMonthsAppointments(int selectedMonth, int selectedYear, DataTable appointments, List<Date> exceptions)
@@ -111,7 +162,7 @@ namespace MyCalendar
                 appointments.Rows.Remove(row);
             }
         }
-
+        
 
 
         public string DayName(string dayName)
