@@ -147,6 +147,9 @@
   <data name="Confirm" xml:space="preserve">
     <value>Bestätigen</value>
   </data>
+  <data name="Today" xml:space="preserve">
+    <value>Heute</value>
+  </data>
   <data name="Confirm and save" xml:space="preserve">
     <value>Speichern bestätigen</value>
   </data>

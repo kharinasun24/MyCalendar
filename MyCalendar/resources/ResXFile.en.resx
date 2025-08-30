@@ -156,6 +156,9 @@
   <data name="Contact" xml:space="preserve">
     <value>Contact</value>
   </data>
+  <data name="Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
   <data name="Contact must have a name!" xml:space="preserve">
     <value>Contact must have a name!</value>
   </data>

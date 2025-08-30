@@ -14,11 +14,12 @@ namespace MyCalendar
 
         ResourceManager resourceManager;
 
-
         public MonthCalendar monthCalendar;
 
         private DateDao dateDao;
         private LanguageDao languageDao;
+
+        private string lastDataHash = "";
 
         private List<Date> exceptions;
 
@@ -29,6 +30,8 @@ namespace MyCalendar
 
         private Button showWeatherButton;
         private Button btnShowAllAppointments;
+
+        private Label currentDateLabel;
 
         private ToolTip boldedOrHoliDayToolTip;
 
@@ -190,6 +193,17 @@ namespace MyCalendar
 
         private void CreateUIControls()
         {
+            currentDateLabel = new Label
+            {
+                Location = new Point(10, 10), // Position anpassen
+                AutoSize = true,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                ForeColor = Color.DarkBlue
+            };
+
+            Controls.Add(currentDateLabel);
+
+            SetCurrentDateLabel();
 
             pickDay = new Label
             {
@@ -357,7 +371,7 @@ namespace MyCalendar
             Button chtButton = new System.Windows.Forms.Button
             {
                 Text = " - 👥 - ",
-                Location = new Point(10, 500),
+                Location = new Point(240, 390),
                 AutoSize = true
             };
 
@@ -367,13 +381,48 @@ namespace MyCalendar
 
 
         }
-         
+
+        private void SetCurrentDateLabel()
+        {
+            DateTime now = DateTime.Now;
+            string dayOfWeekEnglish = now.ToString("dddd", CultureInfo.InvariantCulture); // Wochentag auf Englisch
+            currentDateLabel.Text = resourceManager.GetString("Today") + ": " + now.ToString("yyyy-MM-dd") + " (" + StringValidators.Instance.DayName(now.DayOfWeek.ToString().Substring(0, 2)) + ".)";
+        }
+
+        //TODO 1: How to delete weekly appointments in one scoop? Why is the chat not working?
+        private string ComputeAppointmentsHash(DataTable appointments)
+        {
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            {
+                var sb = new System.Text.StringBuilder();
+
+                foreach (DataRow row in appointments.Rows)
+                {
+                    foreach (DataColumn col in appointments.Columns)
+                    {
+                        var value = row[col] != null ? row[col].ToString() : string.Empty;
+                        sb.Append(value);
+                    }
+                }
+
+                var hashBytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
+                return Convert.ToBase64String(hashBytes);
+            }
+        }
+
+
+
         private async Task CreateCalendar(int year, int month, int day)
         {
             holidays = await LoadHolidaysAsync();
 
             appointments = dateDao.GetDatesFor(day, month, year);
 
+            //TODO 2: Ready fpr testing, hier will ich verhindern, dass der Kalender dauern neu gezeichnet wird.
+            string currentHash = ComputeAppointmentsHash(appointments);
+            if (currentHash != lastDataHash)
+            {
+              
             // Entfernen der alten Kalender-Labels
             RemoveOldCalendarLabels();
             List<KeyValuePair<string, DateTime>> appointmentsToIDsDict = StringValidators.Instance.AppointmentsToDateTimeDict(day, month, year, appointments);
@@ -519,7 +568,9 @@ namespace MyCalendar
                     Controls.Add(dayLabel);
 
                 }
+              }
             }
+            lastDataHash = currentHash;           
         }
 
         private void DayLabel_Click(object sender, EventArgs e)
@@ -532,6 +583,9 @@ namespace MyCalendar
                 // var holiday = holidays?.FirstOrDefault(h => h.Date.Date == date);
                 // string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
                 // MessageBox.Show($"Du hast den Tag {date:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
+
+                // Tag auch im MonthCalendar auswählen
+                monthCalendar.SetDate(date);
 
                 FilterGridByDate(date);
             }

@@ -270,6 +270,9 @@
   <data name="Table view" xml:space="preserve">
     <value>Просмотр таблицы</value>
   </data>
+  <data name="Today" xml:space="preserve">
+    <value>Сегодня</value>
+  </data>
   <data name="temperature" xml:space="preserve">
     <value>температура</value>
   </data>

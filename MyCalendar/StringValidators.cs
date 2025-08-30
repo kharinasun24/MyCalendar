@@ -34,55 +34,7 @@ namespace MyCalendar
                 return _instance;
             }
         }
-        //TODO This was a dysfunctional one. The good on is below and ready for testing.
-        /*
-        public bool IsNotInExceptionsMethod(List<KeyValuePair<string, DateTime>> appointmentsToIDsDict,
-
-        DateTime givenAppointmentNotAdjusted, int year, int month, int day)
-        {
-
-            DateDao dateDao = new DateDao();
-
-            // Liste der Ausnahmen abrufen
-            List<Date> exceptions = dateDao.GetExceptions();
-
-            // Überprüfung, ob eines der IDs in appointmentsToIDsDict einem Date-Objekt in exceptions entspricht
-            bool found = false;
-            foreach (var date in exceptions)
-            {
-                if (appointmentsToIDsDict.Any(kvp => kvp.Key == date.id))
-                {
-                    found = true;
-                    break;  // Falls gefunden, können wir die Schleife beenden
-                }
-            }
-
-            // Wenn keine ID gefunden wurde, die mit einem date.id übereinstimmt, dann gibt es auch keine exception.
-            if (!found)
-            {
-                return true;
-            }
-            // Datum anpassen: givenAppointmentNotAdjusted soll das angepasste Jahr und den Monat erhalten
-            DateTime givenAppointmentAdjusted = new DateTime(year, month, givenAppointmentNotAdjusted.Day);
-
-            // Überprüfen, ob das angepasste Datum innerhalb von date.start und date.end liegt (nur Tag relevant)
-            foreach (var date in exceptions)
-            {
-                // Vergleich nur auf Basis von Jahr, Monat, Tag (Zeit wird ignoriert)
-                DateTime startDate = DateTime.ParseExact(date.start, "dd.MM.yyyy", CultureInfo.InvariantCulture).Date;
-                DateTime endDate = DateTime.ParseExact(date.end, "dd.MM.yyyy", CultureInfo.InvariantCulture).Date;
-
-                if (givenAppointmentAdjusted.Date >= startDate && givenAppointmentAdjusted.Date <= endDate)
-                {
-                    return true;  // Wenn das Datum innerhalb der Spanne liegt, true zurückgeben
-                }
-            }
-
-            // Falls keine Übereinstimmung gefunden wurde, false zurückgeben
-            return false;
-        }
-        */
-
+        
         public bool IsNotInExceptionsMethod(
     List<KeyValuePair<string, DateTime>> appointmentsToIDsDict,
     DateTime givenAppointmentNotAdjusted,

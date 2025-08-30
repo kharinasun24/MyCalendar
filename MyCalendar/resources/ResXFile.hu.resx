@@ -261,6 +261,9 @@
   <data name="Pick hours" xml:space="preserve">
     <value>óra</value>
   </data>
+  <data name="Today" xml:space="preserve">
+    <value>Ma</value>
+  </data>
   <data name="Rain quantity next hour" xml:space="preserve">
     <value>Esô a következô órában</value>
   </data>

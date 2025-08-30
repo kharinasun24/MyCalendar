@@ -11,7 +11,7 @@ namespace MyCalendar
     {
 
         public string id;
-        private string text;
+        public string text;
         public string start;
         public string end;
         private string duration;
