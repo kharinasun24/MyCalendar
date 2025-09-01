@@ -288,7 +288,7 @@ namespace MyCalendar
             {
                 List<(DateTime Start, DateTime End)> appointments = GetWeeklyAppointments(startDate, endDate);
                 foreach (var appointment in appointments)
-                {
+                {   //TODO I would like to save them as "w".
                     SaveDate(text, appointment.Start, appointment.End, duration, "n");
                 }
             }

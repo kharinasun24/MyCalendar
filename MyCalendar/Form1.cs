@@ -1,5 +1,4 @@
 ﻿using Nager.Holiday;
-using System;
 using System.Data;
 using System.Globalization;
 using System.Resources;
@@ -22,6 +21,9 @@ namespace MyCalendar
         private string lastDataHash = "";
 
         private List<Date> exceptions;
+
+        private HashSet<int> dismissedAppointments = new HashSet<int>();
+
 
         private DataGridView dataGridViewAppointmentsOnClickedDay;
         private DataTable appointments;
@@ -389,7 +391,8 @@ namespace MyCalendar
             currentDateLabel.Text = resourceManager.GetString("Today") + ": " + now.ToString("yyyy-MM-dd") + " (" + StringValidators.Instance.DayName(now.DayOfWeek.ToString().Substring(0, 2)) + ".)";
         }
 
-        //TODO 1: How to delete weekly appointments in one scoop? Why is the chat not working?
+        //TODO: How to delete weekly appointments in one scoop? Why is the chat not working?
+        //As autumn rain starts pouring down, this work is next year's town.
         private string ComputeAppointmentsHash(DataTable appointments)
         {
             using (var sha = System.Security.Cryptography.SHA256.Create())
@@ -418,7 +421,6 @@ namespace MyCalendar
 
             appointments = dateDao.GetDatesFor(day, month, year);
 
-            //TODO 2: Ready fpr testing, hier will ich verhindern, dass der Kalender dauern neu gezeichnet wird.
             string currentHash = ComputeAppointmentsHash(appointments);
             if (currentHash != lastDataHash)
             {
@@ -579,11 +581,6 @@ namespace MyCalendar
 
             if (lbl.Tag is DateTime date)
             {
-                // Optional: kleine Bestätigung
-                // var holiday = holidays?.FirstOrDefault(h => h.Date.Date == date);
-                // string holidayText = holiday != null ? $"\nFeiertag: {holiday.LocalName}" : "";
-                // MessageBox.Show($"Du hast den Tag {date:dd.MM.yyyy} angeklickt.{holidayText}", "Kalender-Tag");
-
                 // Tag auch im MonthCalendar auswählen
                 monthCalendar.SetDate(date);
 
@@ -670,16 +667,19 @@ namespace MyCalendar
         }
 
 
-        private void CreatePlaceHolder(string text)
+        private int? currentAppointmentId;
+
+        private void CreatePlaceHolder(string text, int appointmentId)
         {
             Controls.Remove(placeHolder);
+
+            currentAppointmentId = appointmentId;
 
             placeHolder = new Label
             {
                 Location = new Point(10, 500),
                 Size = new Size(350, 30),
                 Text = text,
-                //AutoSize = true,
                 BackColor = Color.LightBlue
             };
 
@@ -687,6 +687,7 @@ namespace MyCalendar
 
             Controls.Add(placeHolder);
         }
+
 
         private void UpdateAppointments(int day, int month, int year)
         {
@@ -860,29 +861,28 @@ namespace MyCalendar
 
             foreach (DataRow row in appointments.Rows)
             {
+                int appointmentId = Convert.ToInt32(row["id"]);
+                if (dismissedAppointments.Contains(appointmentId))
+                    continue; // überspringen
+
                 DateTime appointmentStart = DateTime.Parse(row["start"].ToString());
-                int notificationLeadTime = 10; // In this case, 5 means five minutes, dude...
+                int notificationLeadTime = 10;
 
                 if (appointmentStart > now && appointmentStart.Subtract(now).TotalMinutes <= notificationLeadTime)
                 {
-                    //System.Media.SystemSounds.Asterisk.Play();
                     System.Media.SystemSounds.Hand.Play();
-                    //System.Media.SystemSounds.Beep.Play();
 
                     string appointmentText = row["text"].ToString();
-                    CreatePlaceHolder(appointmentText + " " + "beginnt in 10 Minuten");
+                    CreatePlaceHolder(appointmentText + " beginnt in 10 Minuten", appointmentId);
 
-                    // Erinnerung:
                     if (this.WindowState == FormWindowState.Minimized)
                     {
                         this.WindowState = FormWindowState.Normal;
                     }
-
                     this.Activate();
-
-
                 }
             }
+
         }
 
 
@@ -972,36 +972,6 @@ namespace MyCalendar
                         }
                         else if (result == DialogResult.No)
                         {
-                            /*
-                            string exception_start = row.Cells["start"].Value.ToString();
-                            DateTime selectedDate = monthCalendar.SelectionStart;
-
-                            string[] dateParts = exception_start.Split('.');
-                            int day = Convert.ToInt32(dateParts[0]);
-                            int month = Convert.ToInt32(dateParts[1]);
-                            int year = Convert.ToInt32(dateParts[2].Substring(0, 4));
-
-                            DateTime newDateTime = new DateTime(selectedDate.Year, selectedDate.Month, day);
-                            string formattedDate = newDateTime.ToString("dd.MM.yyyy");
-
-                            exception_start = formattedDate;
-
-                            string exception_end = row.Cells["end"].Value.ToString();
-                            selectedDate = monthCalendar.SelectionStart;
-
-                            dateParts = exception_end.Split('.');
-                            day = Convert.ToInt32(dateParts[0]);
-                            month = Convert.ToInt32(dateParts[1]);
-                            year = Convert.ToInt32(dateParts[2].Substring(0, 4));
-
-                            newDateTime = new DateTime(selectedDate.Year, selectedDate.Month, day);
-                            formattedDate = newDateTime.ToString("dd.MM.yyyy");
-
-                            exception_end = formattedDate;
-
-                            dateDao.WriteExceptionIntoExceptionTBL(idToDelete, exception_start, exception_end);
-                            */
-
                             string exception_start = row.Cells["start"].Value.ToString();
                             DateTime startDT = DateTime.ParseExact(exception_start, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
 
@@ -1011,7 +981,6 @@ namespace MyCalendar
                             dateDao.WriteExceptionIntoExceptionTBL(idToDelete, startDT.ToString("dd.MM.yyyy"), endDT.ToString("dd.MM.yyyy"));
 
                             DrawAppointmentsOnClickedDay(d, m, y, dateDao);
-
 
                             //Application.Restart();
                             //Environment.Exit(0);
@@ -1054,9 +1023,15 @@ namespace MyCalendar
 
         private void Placeholder_Click(object? sender, EventArgs e)
         {
+            if (currentAppointmentId.HasValue)
+            {
+                dismissedAppointments.Add(currentAppointmentId.Value);
+                currentAppointmentId = null;
+            }
 
             placeHolder.Text = "";
         }
+
 
         private void DataGridView_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
