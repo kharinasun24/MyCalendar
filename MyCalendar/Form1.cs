@@ -13,12 +13,14 @@ namespace MyCalendar
 
         ResourceManager resourceManager;
 
+        CultureInfo ci;
+
         public MonthCalendar monthCalendar;
 
         private DateDao dateDao;
         private LanguageDao languageDao;
 
-        private string lastDataHash = "";
+        //private string lastDataHash = "";
 
         private List<Date> exceptions;
 
@@ -33,13 +35,15 @@ namespace MyCalendar
         private Button showWeatherButton;
         private Button btnShowAllAppointments;
 
-        private Label currentDateLabel;
-
         private ToolTip boldedOrHoliDayToolTip;
 
+        private Label currentDateLabel;
         private Label placeHolder;
         private Label pickDay;
         private Label pickClock;
+
+        private Panel calendarPanel;
+
         private TextBox location;
         private ComboBox languageComboBox;
 
@@ -388,10 +392,18 @@ namespace MyCalendar
         {
             DateTime now = DateTime.Now;
             string dayOfWeekEnglish = now.ToString("dddd", CultureInfo.InvariantCulture); // Wochentag auf Englisch
-            currentDateLabel.Text = resourceManager.GetString("Today") + ": " + now.ToString("yyyy-MM-dd") + " (" + StringValidators.Instance.DayName(now.DayOfWeek.ToString().Substring(0, 2)) + ".)";
+        
+            
+            //currentDateLabel.Text = resourceManager.GetString("Today") + ": " + now.ToString("dd.MM.yyyy") + " (" + StringValidators.Instance.DayName(now.DayOfWeek.ToString().Substring(0, 2)) + ".)";
+
+
+            currentDateLabel.Text = resourceManager.GetString("Today") + ": " + now.ToString("d", ci) + " (" + StringValidators.Instance.DayName(now.DayOfWeek.ToString().Substring(0, 2)) + ")";
+
+
+
         }
 
-        //TODO: How to delete weekly appointments in one scoop? Why is the chat not working?
+        //TODO: How to delete weekly appointments (till year's end) in one scoop by giving all creation dates a unique time stamp or hash? Why is the chat not working? Extend yearly and monthly appointments to 28 or 30 days?
         //As autumn rain starts pouring down, this work is next year's town.
         private string ComputeAppointmentsHash(DataTable appointments)
         {
@@ -413,8 +425,113 @@ namespace MyCalendar
             }
         }
 
+        
+        private async Task CreateCalendar(int year, int month, int day)
+        {
+            // Panel nur einmal erstellen
+            if (calendarPanel == null)
+            {
+                calendarPanel = new Panel
+                {
+                    Name = "calendarPanel",
+                    Location = new Point(550, 265),
+                    Size = new Size(7 * 40, 6 * 40), // 7 Tage, bis zu 6 Wochen
+                    BorderStyle = BorderStyle.None,
+                    AutoScroll = true
+                };
+                Controls.Add(calendarPanel);
+            }
 
+            // Daten laden
+            holidays = await LoadHolidaysAsync();
+            appointments = dateDao.GetDatesFor(day, month, year);
 
+            //string currentHash = ComputeAppointmentsHash(appointments);
+            //if (currentHash == lastDataHash)
+            //    return; // Keine Änderungen, nichts tun
+
+            calendarPanel.Controls.Clear(); // Alte Labels entfernen
+            calendarPanel.SuspendLayout();
+
+            // Hilfsstruktur für Terminprüfung
+            var appointmentsDict = StringValidators.Instance.AppointmentsToDateTimeDict(day, month, year, appointments);
+            DateTime firstDayOfMonth = new DateTime(year, month, 1);
+            int daysInMonth = DateTime.DaysInMonth(year, month);
+            int startDayOfWeek = ((int)firstDayOfMonth.DayOfWeek + 6) % 7; // Montag als 1.
+
+            DateTime today = DateTime.Now.Date;
+
+            for (int d = 1; d <= daysInMonth; d++)
+            {
+                DateTime currentDate = new DateTime(year, month, d);
+
+                bool hasAppointment = appointmentsDict.Any(kvp => kvp.Value == currentDate);
+                bool isNotInExceptions = StringValidators.Instance.IsNotInExceptionsMethod(appointmentsDict, currentDate, year, month, d);
+                bool isHoliday = holidays?.Any(h => h.Date.Date == currentDate.Date) ?? false;
+
+                // Hintergrundfarbe
+                Color backColor = currentDate == today
+                    ? Color.LightBlue
+                    : (isHoliday ? Color.Red : (hasAppointment && isNotInExceptions ? Color.White : SystemColors.Control));
+
+                // Label erstellen
+                Label dayLabel = new Label
+                {
+                    Text = $"{d} {StringValidators.Instance.DayName(currentDate.DayOfWeek.ToString().Substring(0, 2))}",
+                    Width = 40,
+                    Height = 40,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Location = new Point(40 * ((startDayOfWeek + d - 1) % 7), 40 * ((startDayOfWeek + d - 1) / 7)),
+                    Name = "calendarDay",
+                    Tag = currentDate.Date,
+                    BackColor = backColor,
+                    Font = new Font("Arial", 8, hasAppointment && isNotInExceptions ? FontStyle.Bold : FontStyle.Regular)
+                };
+
+                // Tooltip aufbauen
+                string tooltipText = "";
+
+                if (hasAppointment && isNotInExceptions)
+                {
+                    int selectedMonth = monthCalendar.SelectionStart.Month;
+                    int selectedYear = monthCalendar.SelectionStart.Year;
+                    StringValidators.Instance.GetMonthsAppointments(selectedMonth, selectedYear, appointments, exceptions);
+
+                    foreach (DataRow row in appointments.Rows)
+                    {
+                        DateTime dateStart = DateTime.ParseExact(row.Field<string>("start").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                        DateTime dateEnd = DateTime.ParseExact(row.Field<string>("end").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+
+                        DateTime adjustedStart = new DateTime(selectedYear, selectedMonth, dateStart.Day, 0, 0, 0);
+                        DateTime adjustedEnd = new DateTime(selectedYear, selectedMonth, dateEnd.Day, 23, 59, 59);
+
+                        if (adjustedStart <= currentDate && currentDate <= adjustedEnd)
+                            tooltipText += $"-> {row.Field<string>("text")}\n";
+                    }
+                }
+
+                // Feiertag anhängen, falls vorhanden
+                if (isHoliday)
+                {
+                    var holiday = holidays.FirstOrDefault(h => h.Date == currentDate);
+                    if (holiday != null)
+                        tooltipText += $" {holiday.LocalName}";
+                }
+
+                if (!string.IsNullOrEmpty(tooltipText))
+                    boldedOrHoliDayToolTip.SetToolTip(dayLabel, tooltipText);
+
+                dayLabel.Click += DayLabel_Click;
+                calendarPanel.Controls.Add(dayLabel);
+            }
+
+            calendarPanel.ResumeLayout(true);
+            //lastDataHash = currentHash;
+        }
+        
+
+        /*
         private async Task CreateCalendar(int year, int month, int day)
         {
             holidays = await LoadHolidaysAsync();
@@ -442,7 +559,8 @@ namespace MyCalendar
             // Labels für die Tage des Monats erstellen mit
             string dateNameAsTooltip = "";
             string testHolidayToAdd = "";
-            
+
+            SuspendLayout();    
 
             for (int d = 1; d <= daysInMonth; d++)
             {
@@ -572,8 +690,13 @@ namespace MyCalendar
                 }
               }
             }
+            ResumeLayout();
+            PerformLayout();
+
             lastDataHash = currentHash;           
         }
+
+        */
 
         private void DayLabel_Click(object sender, EventArgs e)
         {
@@ -818,7 +941,7 @@ namespace MyCalendar
                     break;
             }
 
-            CultureInfo ci = new CultureInfo(culture);
+            ci = new CultureInfo(culture);
             Thread.CurrentThread.CurrentCulture = ci;
             Thread.CurrentThread.CurrentUICulture = ci;
         }
@@ -1005,6 +1128,9 @@ namespace MyCalendar
 
                         }
                     }
+                    
+                    monthCalendar.SetDate(DateTime.Now);
+
                 }
                 else
                 {
