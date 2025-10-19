@@ -468,12 +468,14 @@ namespace MyCalendar
             );
 
             var tooltipData = appointments.AsEnumerable()
-                .Select(row => new {
+            .Select(row => new {
                 Start = DateTime.ParseExact(row.Field<string>("start").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture),
                 End = DateTime.ParseExact(row.Field<string>("end").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture),
-                Text = row.Field<string>("text")
+                Text = row.Field<string>("text"),
+                Repeat = row.Field<string>("repeat") // 'y' = jährlich, 'm' = monatlich, '' oder null = einmalig
             })
             .ToList();
+
 
             Font regularFont = new Font("Arial", 8, FontStyle.Regular);
             Font boldFont = new Font("Arial", 8, FontStyle.Bold);
@@ -523,9 +525,28 @@ namespace MyCalendar
                         // Hier wird die bereits definierte tooltipData verwendet
                         foreach (var t in tooltipData)
                         {
-                            if (t.Start <= currentDate && currentDate <= t.End)
+                            bool match = false;
+
+                            if (t.Repeat == "y")
+                            {
+                                // jährlich wiederholter Termin → Tag und Monat müssen stimmen
+                                match = (t.Start.Month == currentDate.Month && t.Start.Day == currentDate.Day);
+                            }
+                            else if (t.Repeat == "m")
+                            {
+                                // monatlich wiederholter Termin → nur Tag muss stimmen
+                                match = (t.Start.Day == currentDate.Day);
+                            }
+                            else
+                            {
+                                // einmaliger oder zeitlich begrenzter Termin → normales Zeitintervall prüfen
+                                match = (t.Start <= currentDate && currentDate <= t.End);
+                            }
+
+                            if (match)
                                 tooltipText += $"-> {t.Text}\n";
                         }
+
                     }
 
                     // Feiertag anhängen, falls vorhanden
