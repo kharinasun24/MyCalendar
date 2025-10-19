@@ -450,8 +450,10 @@ namespace MyCalendar
             //if (currentHash == lastDataHash)
             //    return; // Keine Änderungen, nichts tun
 
+            this.SuspendLayout();
             calendarPanel.Controls.Clear(); // Alte Labels entfernen
             calendarPanel.SuspendLayout();
+
 
             // Hilfsstruktur für Terminprüfung
             var appointmentsDict = StringValidators.Instance.AppointmentsToDateTimeDict(day, month, year, appointments);
@@ -461,11 +463,28 @@ namespace MyCalendar
 
             DateTime today = DateTime.Now.Date;
 
+            var appointmentDates = new HashSet<DateTime>(
+              appointmentsDict.Select(v => v.Value)
+            );
+
+            var tooltipData = appointments.AsEnumerable()
+                .Select(row => new {
+                Start = DateTime.ParseExact(row.Field<string>("start").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture),
+                End = DateTime.ParseExact(row.Field<string>("end").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture),
+                Text = row.Field<string>("text")
+            })
+            .ToList();
+
+            Font regularFont = new Font("Arial", 8, FontStyle.Regular);
+            Font boldFont = new Font("Arial", 8, FontStyle.Bold);
+
+            var tooltipCache = new Dictionary<DateTime, string>();
+
             for (int d = 1; d <= daysInMonth; d++)
             {
                 DateTime currentDate = new DateTime(year, month, d);
 
-                bool hasAppointment = appointmentsDict.Any(kvp => kvp.Value == currentDate);
+                bool hasAppointment = appointmentDates.Contains(currentDate.Date);
                 bool isNotInExceptions = StringValidators.Instance.IsNotInExceptionsMethod(appointmentsDict, currentDate, year, month, d);
                 bool isHoliday = holidays?.Any(h => h.Date.Date == currentDate.Date) ?? false;
 
@@ -486,218 +505,58 @@ namespace MyCalendar
                     Name = "calendarDay",
                     Tag = currentDate.Date,
                     BackColor = backColor,
-                    Font = new Font("Arial", 8, hasAppointment && isNotInExceptions ? FontStyle.Bold : FontStyle.Regular)
+                    Font = hasAppointment && isNotInExceptions ? boldFont : regularFont
                 };
 
-                // Tooltip aufbauen
-                string tooltipText = "";
-
-                if (hasAppointment && isNotInExceptions)
+            
+                // Tooltiptext ggf. aus dem Cache holen
+                if (!tooltipCache.TryGetValue(currentDate, out string tooltipText))
                 {
-                    int selectedMonth = monthCalendar.SelectionStart.Month;
-                    int selectedYear = monthCalendar.SelectionStart.Year;
-                    StringValidators.Instance.GetMonthsAppointments(selectedMonth, selectedYear, appointments, exceptions);
+                    tooltipText = "";
 
-                    foreach (DataRow row in appointments.Rows)
+                    if (hasAppointment && isNotInExceptions)
                     {
-                        DateTime dateStart = DateTime.ParseExact(row.Field<string>("start").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-                        DateTime dateEnd = DateTime.ParseExact(row.Field<string>("end").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-
-                        DateTime adjustedStart = new DateTime(selectedYear, selectedMonth, dateStart.Day, 0, 0, 0);
-                        DateTime adjustedEnd = new DateTime(selectedYear, selectedMonth, dateEnd.Day, 23, 59, 59);
-
-                        if (adjustedStart <= currentDate && currentDate <= adjustedEnd)
-                            tooltipText += $"-> {row.Field<string>("text")}\n";
-                    }
-                }
-
-                // Feiertag anhängen, falls vorhanden
-                if (isHoliday)
-                {
-                    var holiday = holidays.FirstOrDefault(h => h.Date == currentDate);
-                    if (holiday != null)
-                        tooltipText += $" {holiday.LocalName}";
-                }
-
-                if (!string.IsNullOrEmpty(tooltipText))
-                    boldedOrHoliDayToolTip.SetToolTip(dayLabel, tooltipText);
-
-                dayLabel.Click += DayLabel_Click;
-                calendarPanel.Controls.Add(dayLabel);
-            }
-
-            calendarPanel.ResumeLayout(true);
-            //lastDataHash = currentHash;
-        }
-        
-
-        /*
-        private async Task CreateCalendar(int year, int month, int day)
-        {
-            holidays = await LoadHolidaysAsync();
-
-            appointments = dateDao.GetDatesFor(day, month, year);
-
-            string currentHash = ComputeAppointmentsHash(appointments);
-            if (currentHash != lastDataHash)
-            {
-              
-            // Entfernen der alten Kalender-Labels
-            RemoveOldCalendarLabels();
-            List<KeyValuePair<string, DateTime>> appointmentsToIDsDict = StringValidators.Instance.AppointmentsToDateTimeDict(day, month, year, appointments);
-
-            DateTime firstDayOfMonth = new DateTime(year, month, 1);
-            int daysInMonth = DateTime.DaysInMonth(year, month);
-
-            //Wähle bewusst Sonntag als ersten tag, kann hier geändert werden.
-            //int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
-
-            //...Montag als ersten Tag:
-            int startDayOfWeek = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
-
-            DateTime givenDate;
-            // Labels für die Tage des Monats erstellen mit
-            string dateNameAsTooltip = "";
-            string testHolidayToAdd = "";
-
-            SuspendLayout();    
-
-            for (int d = 1; d <= daysInMonth; d++)
-            {
-                givenDate = new DateTime(year, month, d);
-
-                // Überprüfen, ob das Datum in der Liste vorhanden ist
-                //bool dateExists = appointmentsToIDsDict.Values.Contains(givenDate);
-                bool dateExists = appointmentsToIDsDict.Any(kvp => kvp.Value == givenDate);
-
-
-                bool isNotInExceptions = StringValidators.Instance.IsNotInExceptionsMethod(appointmentsToIDsDict, givenDate, year, month, d);
-
-                DateTime currentDateCal = DateTime.Now.Date;
-
-                if (dateExists && isNotInExceptions)
-                {
-                    //Hier den Namen des Feiertages herausfinden und setzen.
-                    bool isHoliday = holidays?.Any(h => h.Date.Date == givenDate.Date) ?? false;
-                    Color backgroundColor = givenDate.Date == currentDateCal ? Color.LightBlue : (isHoliday ? Color.Red : Color.White);
-
-
-
-                    Label dayLabel = new Label
-                    {
-                        Text = d.ToString() + " " + StringValidators.Instance.DayName(givenDate.DayOfWeek.ToString().Substring(0, 2)),
-                        Width = 40,
-                        Height = 40,
-                        TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                        BorderStyle = BorderStyle.FixedSingle,
-                        Location = new System.Drawing.Point(40 * ((startDayOfWeek + d - 1) % 7) + 550, 40 * ((startDayOfWeek + d - 1) / 7) + 265),
-                        Name = "calendar",              // ← Kennzeichnung hierher
-                        Tag = givenDate.Date,
-                        BackColor = backgroundColor,
-                        Font = new System.Drawing.Font("Arial", 8, FontStyle.Bold) // Setzt den Text auf fett
-                    };
-
-
-                    dayLabel.Click += DayLabel_Click;
-
-                    if (appointmentsToIDsDict.Any(kvp => kvp.Value == givenDate))
-                    {
-                        //appointments = dateDao.GetDatesFor(day, month, year);
-
                         int selectedMonth = monthCalendar.SelectionStart.Month;
                         int selectedYear = monthCalendar.SelectionStart.Year;
                         StringValidators.Instance.GetMonthsAppointments(selectedMonth, selectedYear, appointments, exceptions);
 
-                        foreach (DataRow row in appointments.Rows)
+                        // Hier wird die bereits definierte tooltipData verwendet
+                        foreach (var t in tooltipData)
                         {
-                            DateTime dateStart = DateTime.ParseExact(row.Field<string>("start").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-                            DateTime dateEnd = DateTime.ParseExact(row.Field<string>("end").Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-                            DateTime dateToolTip = givenDate.Date;
-
-                            // Adjusted Dates bauen (Jahr, Monat, Tag, Zeit)
-                            DateTime adjustedDateStart = new DateTime(selectedYear, selectedMonth, dateStart.Day, 0, 0, 0);
-                            DateTime adjustedDateEnd = new DateTime(selectedYear, selectedMonth, dateEnd.Day, 23, 59, 59);
-
-                            // Prüfen, ob das aktuelle Datum (dateToolTip) innerhalb des Terminzeitraums liegt
-                            if (adjustedDateStart <= dateToolTip && dateToolTip <= adjustedDateEnd)
-                            {
-                                dateNameAsTooltip += "-> " + row.Field<string>("text") + "\n";
-                            }
-
-                            // Feiertag anhängen, falls vorhanden
-                            if (dayLabel.BackColor == Color.Red)
-                            {
-                                var holiday = holidays.FirstOrDefault(h => h.Date == dateToolTip);
-                                if (holiday != null)
-                                    testHolidayToAdd = " " + holiday.LocalName;
-                            }
+                            if (t.Start <= currentDate && currentDate <= t.End)
+                                tooltipText += $"-> {t.Text}\n";
                         }
-
-                        // Letztes Komma entfernen, wenn vorhanden
-                        //if (dateNameAsTooltip.EndsWith(", "))
-                        //    dateNameAsTooltip = dateNameAsTooltip.Substring(0, dateNameAsTooltip.Length - 2);
-
-                        boldedOrHoliDayToolTip.SetToolTip(dayLabel, $"{dateNameAsTooltip}{testHolidayToAdd}");
-
-                        dateNameAsTooltip = "";
-                        testHolidayToAdd = "";
                     }
 
-
-
-
-                    Controls.Add(dayLabel);
-
-                }
-
-
-                else
-                {
-
-                    bool isHoliday = holidays?.Any(h => h.Date.Date == givenDate.Date) ?? false;
-                    Color backgroundColor = givenDate.Date == currentDateCal ? Color.LightBlue : (isHoliday ? Color.Red : SystemColors.Control);
-
-                    DateTime dateToolTip = DateTime.ParseExact(givenDate.ToString().Split(' ')[0], "dd.MM.yyyy", CultureInfo.InvariantCulture);
-
-                    Label dayLabel = new Label
+                    // Feiertag anhängen, falls vorhanden
+                    if (isHoliday)
                     {
-                        Text = d.ToString() + " " + StringValidators.Instance.DayName(givenDate.DayOfWeek.ToString().Substring(0, 2)),
-                        Width = 40,
-                        Height = 40,
-                        TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                        BorderStyle = BorderStyle.FixedSingle,
-                        Location = new System.Drawing.Point(40 * ((startDayOfWeek + d - 1) % 7) + 550, 40 * ((startDayOfWeek + d - 1) / 7) + 265),
-                        Name = "calendar",              // ← Kennzeichnung hierher
-                        Tag = givenDate.Date,
-                        BackColor = backgroundColor,
-                        Font = new System.Drawing.Font("Arial", 8)
-                    };
-
-                    if (dayLabel.BackColor == Color.Red)
-                    {
-                        var holiday = holidays.FirstOrDefault(h => h.Date == dateToolTip);
-                        testHolidayToAdd = holiday.LocalName;
-
-                        boldedOrHoliDayToolTip.SetToolTip(dayLabel, $"{testHolidayToAdd}");
-                        testHolidayToAdd = "";
+                        var holiday = holidays.FirstOrDefault(h => h.Date == currentDate);
+                        if (holiday != null)
+                            tooltipText += $" {holiday.LocalName}";
                     }
 
-
-                    dayLabel.Click += DayLabel_Click;
-
-                    Controls.Add(dayLabel);
-
+                    // Im Cache speichern
+                    tooltipCache[currentDate] = tooltipText;
                 }
-              }
+                // Tooltip setzen, falls vorhanden
+                if (!string.IsNullOrEmpty(tooltipText))
+                    boldedOrHoliDayToolTip.SetToolTip(dayLabel, tooltipText);
+
+                // Rest bleibt wie gehabt
+                dayLabel.Click += DayLabel_Click;
+                calendarPanel.Controls.Add(dayLabel);
+
+
             }
-            ResumeLayout();
-            PerformLayout();
 
-            lastDataHash = currentHash;           
+            calendarPanel.ResumeLayout(false);
+            this.ResumeLayout(false);
+            //lastDataHash = currentHash;
         }
+        
 
-        */
-
+ 
         private void DayLabel_Click(object sender, EventArgs e)
         {
             var lbl = (Label)sender;
