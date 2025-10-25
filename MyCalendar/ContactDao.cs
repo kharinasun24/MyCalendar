@@ -69,36 +69,8 @@ namespace MyCalendar
             return dt;
         }
 
-        /*
-              public DataTable GetContactsOrderByIsCouple(string dateid)
-              {
-                  string connectionString = configuration.GetConnectionString("SQLiteConnection");
-                  DataTable dt = new DataTable();
-
-                  using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-                  {
-                      connection.Open();
-
-
-                      string sql = "SELECT contacts.id, contacts.name FROM contacts LEFT JOIN couples ON contacts.id = couples.id_contact ORDER BY couples.id_contact DESC";
-
-                      using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-                      {
-                          using (SQLiteDataReader reader = command.ExecuteReader())
-                          {
-                              dt.Load(reader); // Direktes Laden der Daten in den DataTable
-                          }
-                      }
-                  }
-
-                  return dt;
-              }
-        */
-
-
         public bool GetLinkedContact(string dateID, string contactID)
         {
-
             bool boolValue = false;
             string connectionString = configuration.GetConnectionString("SQLiteConnection");
             string iscouple = "";
@@ -107,116 +79,101 @@ namespace MyCalendar
             {
                 connection.Open();
 
-                string sql = $"SELECT iscouple FROM couples WHERE id_date = '{dateID}' AND id_contact = '{contactID}' AND iscouple = '1'";
+                string sql = "SELECT iscouple FROM couples WHERE id_date = @dateID AND id_contact = @contactID AND iscouple = '1'";
 
                 using (SQLiteCommand command = new SQLiteCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@dateID", dateID);
+                    command.Parameters.AddWithValue("@contactID", contactID);
+
                     using (SQLiteDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             iscouple = reader["iscouple"].ToString();
-
                         }
-
-
-
                     }
                 }
                 connection.Close();
             }
 
-
-            if ("1".Equals(iscouple))
-            {
-                boolValue = true;
-            }
-            else
-            {
-                boolValue = false;
-            }
-
+            boolValue = iscouple == "1";
             return boolValue;
-
         }
-
 
         public void ToggleCouple(string id, string clickedCellValue)
         {
-            string connectionString = configuration.GetConnectionString("SQLiteConnection");
-
-            SQLiteConnection connection = new SQLiteConnection(connectionString);
-
-            connection.Open();
-
-            // SQL-Befehle für Update und Insert
-            string sqlUpdate = $"UPDATE couples SET iscouple = CASE WHEN iscouple = '0' THEN '1' ELSE '0' END WHERE id_date = @id AND id_contact = @clickedCellValue;";
-            string sqlInsert = $"INSERT INTO couples (id_date, id_contact, iscouple) VALUES (@id, @clickedCellValue, '1');";
-            string sqlDelete = "DELETE FROM couples WHERE iscouple = '0';";
-
-
-            // Beginne die SQL-Transaktion
-            using (SQLiteCommand command = new SQLiteCommand(sqlUpdate, connection))
-            {
-                // Parameter zum SQL-Befehl hinzufügen
-                command.Parameters.AddWithValue("@id", id);
-                command.Parameters.AddWithValue("@clickedCellValue", clickedCellValue);
-
-                // Führt das Update aus
-                int rowsAffected = command.ExecuteNonQuery();
-
-                // Wenn keine Zeilen betroffen sind, füge einen neuen Datensatz ein
-                if (rowsAffected == 0)
-                {
-                    using (SQLiteCommand insertCommand = new SQLiteCommand(sqlInsert, connection))
-                    {
-                        insertCommand.Parameters.AddWithValue("@id", id);
-                        insertCommand.Parameters.AddWithValue("@clickedCellValue", clickedCellValue);
-
-                        insertCommand.ExecuteNonQuery();
-                    }
-                }
-
-                using (SQLiteCommand deleteCommand = new SQLiteCommand(sqlDelete, connection))
-                {
-                    deleteCommand.ExecuteNonQuery();
-                }
-
-                connection.Close();
-            }
-
-        }
-
-
-        public void DeleteEntryById(string id)
-        {
-
-
             string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
 
-                string sql = $"DELETE FROM contacts WHERE id = @id";
-                using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+                string sqlUpdate = "UPDATE couples SET iscouple = CASE WHEN iscouple = '0' THEN '1' ELSE '0' END WHERE id_date = @id AND id_contact = @clickedCellValue;";
+                string sqlInsert = "INSERT INTO couples (id_date, id_contact, iscouple) VALUES (@id, @clickedCellValue, '1');";
+                string sqlDelete = "DELETE FROM couples WHERE iscouple = '0';";
+
+                using (SQLiteCommand command = new SQLiteCommand(sqlUpdate, connection))
                 {
                     command.Parameters.AddWithValue("@id", id);
-                    command.ExecuteNonQuery();
+                    command.Parameters.AddWithValue("@clickedCellValue", clickedCellValue);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected == 0)
+                    {
+                        using (SQLiteCommand insertCommand = new SQLiteCommand(sqlInsert, connection))
+                        {
+                            insertCommand.Parameters.AddWithValue("@id", id);
+                            insertCommand.Parameters.AddWithValue("@clickedCellValue", clickedCellValue);
+                            insertCommand.ExecuteNonQuery();
+                        }
+                    }
+
+                    using (SQLiteCommand deleteCommand = new SQLiteCommand(sqlDelete, connection))
+                    {
+                        deleteCommand.ExecuteNonQuery();
+                    }
                 }
-
-
-                string sql2 = $"DELETE FROM couples WHERE id_contact = @id";
-                using (SQLiteCommand command = new SQLiteCommand(sql2, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
             }
         }
 
+        public void DeleteEntryById(string id)
+        {
+            string connectionString = configuration.GetConnectionString("SQLiteConnection");
+
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SQLiteTransaction transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        string sql = "DELETE FROM contacts WHERE id = @id";
+                        using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+                        {
+                            command.Parameters.AddWithValue("@id", id);
+                            command.ExecuteNonQuery();
+                        }
+
+                        string sql2 = "DELETE FROM couples WHERE id_contact = @id";
+                        using (SQLiteCommand command = new SQLiteCommand(sql2, connection))
+                        {
+                            command.Parameters.AddWithValue("@id", id);
+                            command.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Fehler beim Löschen des Eintrags", ex);
+                    }
+                }
+            }
+        }
 
         public void CreateNewContact(string name, string nameGiven, string phone, string email, string birthday, string notes, string address, string addressstreet)
         {
@@ -279,17 +236,18 @@ namespace MyCalendar
         public List<Contact> GetContactsOrderByIsCoupleId(string id)
         {
             List<Contact> ctcs = new List<Contact>();
-
             string connectionString = configuration.GetConnectionString("SQLiteConnection");
 
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
 
-                string sql = $"SELECT * FROM contacts WHERE id = '{id}'";
+                string sql = "SELECT * FROM contacts WHERE id = @id";
 
                 using (SQLiteCommand command = new SQLiteCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@id", id);
+
                     using (SQLiteDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -305,12 +263,10 @@ namespace MyCalendar
                             string addressstreet = reader["address_street"].ToString();
 
                             Contact c = new Contact(idd, name, nameGiven, phone, email, birthday, notes, address, addressstreet);
-
                             ctcs.Add(c);
                         }
                     }
                 }
-
                 connection.Close();
             }
 
