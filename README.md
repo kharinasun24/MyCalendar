@@ -1,1 +1,1 @@
-README.txt contained within the project folder.
+A simple calendar app to manage appointments and contacts.
